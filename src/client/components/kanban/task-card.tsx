@@ -21,7 +21,7 @@ export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
   return (
     <div
       data-task-id={task.id}
-      className={`p-2 cursor-pointer hover:ring bg-accent w-full flex flex-col wrap-break-word`}
+      className={`p-3 cursor-pointer hover:ring bg-accent w-full flex flex-col break-words`}
       onClick={onClick}
     >
       <div className="flex items-center justify-between mb-1">
@@ -32,7 +32,7 @@ export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
         <PriorityBadge priority={task.priority} />
       </div>
 
-      <h4 className="text-sm font-medium mb-1">{task.title}</h4>
+      <h4 className="text-sm font-medium mb-2">{task.title}</h4>
 
       {task.description && (
         <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{task.description}</p>

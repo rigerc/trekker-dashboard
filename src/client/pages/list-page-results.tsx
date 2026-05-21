@@ -37,33 +37,76 @@ export function ListPageResults({
   return (
     <PageResultsFrame
       content={
-        <table className="w-full">
-          <thead className="sticky top-0 bg-muted/50">
-            <tr className="text-left text-sm">
-              <th className="hidden sm:table-cell px-4 py-3 font-medium">ID</th>
-              <th className="px-4 py-3 font-medium">Type</th>
-              <th className="px-4 py-3 font-medium">Title</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="hidden sm:table-cell px-4 py-3 font-medium">Priority</th>
-              <th className="hidden md:table-cell px-4 py-3 font-medium">Created</th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+          {/* Desktop table */}
+          <table className="hidden sm:table w-full">
+            <thead className="sticky top-0 bg-muted/50">
+              <tr className="text-left text-sm">
+                <th className="px-4 py-3 font-medium">ID</th>
+                <th className="px-4 py-3 font-medium">Type</th>
+                <th className="px-4 py-3 font-medium">Title</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="hidden md:table-cell px-4 py-3 font-medium">Priority</th>
+                <th className="hidden lg:table-cell px-4 py-3 font-medium">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr
+                  key={item.id}
+                  className="cursor-pointer border-t transition-colors hover:bg-muted/30"
+                  onClick={() => onRowClick(item)}
+                >
+                  <td className="px-4 py-3 font-mono text-sm text-muted-foreground">{item.id}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant="outline" className={cn(getTypeBadgeClassName(item.type))}>
+                      {item.type}
+                    </Badge>
+                  </td>
+                  <td className="max-w-md truncate px-4 py-3">{item.title}</td>
+                  <td className="px-4 py-3">
+                    <Badge
+                      style={{
+                        backgroundColor: STATUS_STYLES[item.status]?.bg ?? '#6b7280',
+                        color: STATUS_STYLES[item.status]?.text ?? '#ffffff',
+                      }}
+                    >
+                      {STATUS_LABELS[item.status] ?? item.status}
+                    </Badge>
+                  </td>
+                  <td className="hidden md:table-cell px-4 py-3">
+                    <Badge
+                      variant="outline"
+                      style={{
+                        borderColor: PRIORITY_STYLES[item.priority]?.bg ?? '#6b7280',
+                        color: PRIORITY_STYLES[item.priority]?.bg ?? '#6b7280',
+                      }}
+                    >
+                      P{item.priority} - {PRIORITY_LABELS[item.priority]}
+                    </Badge>
+                  </td>
+                  <td className="hidden lg:table-cell px-4 py-3 text-sm text-muted-foreground">
+                    {formatDate(item.createdAt)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Mobile card list */}
+          <div className="sm:hidden divide-y">
             {items.map((item) => (
-              <tr
+              <div
                 key={item.id}
-                className="cursor-pointer border-t transition-colors hover:bg-muted/30"
+                className="px-4 py-3 cursor-pointer transition-colors hover:bg-muted/30 active:bg-muted/50"
                 onClick={() => onRowClick(item)}
               >
-                <td className="hidden sm:table-cell px-4 py-3 font-mono text-sm text-muted-foreground">{item.id}</td>
-                <td className="px-4 py-3">
-                  <Badge variant="outline" className={cn(getTypeBadgeClassName(item.type))}>
-                    {item.type}
-                  </Badge>
-                </td>
-                <td className="max-w-md truncate px-4 py-3">{item.title}</td>
-                <td className="px-4 py-3">
+                <div className="flex items-start gap-3 mb-1">
+                  <span className="text-sm font-medium leading-snug flex-1 min-w-0 line-clamp-2">
+                    {item.title}
+                  </span>
                   <Badge
+                    className="shrink-0 mt-0.5"
                     style={{
                       backgroundColor: STATUS_STYLES[item.status]?.bg ?? '#6b7280',
                       color: STATUS_STYLES[item.status]?.text ?? '#ffffff',
@@ -71,25 +114,23 @@ export function ListPageResults({
                   >
                     {STATUS_LABELS[item.status] ?? item.status}
                   </Badge>
-                </td>
-                <td className="hidden sm:table-cell px-4 py-3">
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] text-muted-foreground">{item.id}</span>
                   <Badge
                     variant="outline"
-                    style={{
-                      borderColor: PRIORITY_STYLES[item.priority]?.bg ?? '#6b7280',
-                      color: PRIORITY_STYLES[item.priority]?.bg ?? '#6b7280',
-                    }}
+                    className={cn('text-xs', getTypeBadgeClassName(item.type))}
                   >
-                    P{item.priority} - {PRIORITY_LABELS[item.priority]}
+                    {item.type}
                   </Badge>
-                </td>
-                <td className="hidden md:table-cell px-4 py-3 text-sm text-muted-foreground">
-                  {formatDate(item.createdAt)}
-                </td>
-              </tr>
+                  <span className="text-[11px] text-muted-foreground ml-auto">
+                    {formatDate(item.createdAt)}
+                  </span>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </>
       }
       emptyMessage="No items found"
       error={error}

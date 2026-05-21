@@ -22,7 +22,7 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
 
   return (
     <div
-      className="p-2 cursor-pointer bg-blue-50 dark:bg-blue-800 hover:ring wrap-break-word"
+      className="p-3 cursor-pointer bg-blue-50 dark:bg-blue-800 hover:ring break-words"
       onClick={onClick}
     >
       <div className="flex items-center justify-between mb-1">
@@ -33,9 +33,9 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
         <PriorityBadge priority={epic.priority} />
       </div>
 
-      <h4 className="text-sm font-medium mb-2">{epic.title}</h4>
+      <h4 className="text-sm font-medium mb-3">{epic.title}</h4>
 
-      <div className="border-t pt-1.5 flex flex-col gap-1.5">
+      <div className="border-t pt-2 flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
             {taskCount.completed}/{taskCount.total} tasks

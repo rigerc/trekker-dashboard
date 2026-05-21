@@ -21,7 +21,7 @@ export function PagePaginationFooter({
   onPrevious,
 }: PagePaginationFooterProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div>{summary}</div>
 
       <div className="flex items-center gap-2">

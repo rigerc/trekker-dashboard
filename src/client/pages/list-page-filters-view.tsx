@@ -81,29 +81,33 @@ export function ListPageFiltersView({
         ))}
       </div>
 
-      <PageFilterSelect
-        allLabel="All Statuses"
-        options={statusOptions}
-        placeholder="Status"
-        value={statusValue}
-        onValueChange={onStatusChange}
-      />
+      <div className="flex w-full sm:contents gap-2">
+        <PageFilterSelect
+          allLabel="All Statuses"
+          options={statusOptions}
+          placeholder="Status"
+          value={statusValue}
+          widthClassName="flex-1 sm:w-[140px]"
+          onValueChange={onStatusChange}
+        />
 
-      <PageFilterSelect
-        allLabel="All Priorities"
-        options={priorityOptions}
-        placeholder="Priority"
-        value={priorityValue}
-        onValueChange={onPriorityChange}
-      />
+        <PageFilterSelect
+          allLabel="All Priorities"
+          options={priorityOptions}
+          placeholder="Priority"
+          value={priorityValue}
+          widthClassName="flex-1 sm:w-[140px]"
+          onValueChange={onPriorityChange}
+        />
 
-      <PageFilterSelect
-        options={sortOptions}
-        placeholder="Sort"
-        value={sortValue}
-        widthClassName="w-[180px]"
-        onValueChange={onSortChange}
-      />
+        <PageFilterSelect
+          options={sortOptions}
+          placeholder="Sort"
+          value={sortValue}
+          widthClassName="flex-1 sm:w-[180px]"
+          onValueChange={onSortChange}
+        />
+      </div>
 
       {hasActiveFilters && (
         <Button variant="ghost" size="sm" onClick={onClearFilters}>

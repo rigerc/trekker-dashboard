@@ -36,7 +36,7 @@ export function ListPage() {
 
   return (
     <>
-      <main className="flex flex-1 flex-col gap-4 overflow-hidden p-4">
+      <main className="flex flex-1 flex-col gap-3 overflow-hidden p-4">
         <ListPageFilters
           filters={filters}
           hasActiveFilters={hasActiveFilters}
