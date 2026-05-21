@@ -68,7 +68,7 @@ export function KanbanColumn({
 
   return (
     <div className="w-[calc(100vw-2rem)] sm:w-[280px] sm:min-w-[280px] sm:max-w-[320px] shrink-0 snap-start flex flex-col border rounded-md">
-      <div className="flex items-center justify-between border-b px-3 py-2 bg-accent/50">
+      <div className="flex items-center justify-between border-b px-4 py-2.5 bg-accent/50">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
           <Badge variant="secondary" className="text-xs">
@@ -101,7 +101,7 @@ export function KanbanColumn({
       </div>
 
       <div className="flex-1 min-h-[100px] overflow-y-auto">
-        <div className="flex flex-col gap-2 p-3">
+        <div className="flex flex-col gap-3 p-4">
           {filteredEpics.map((epic) => (
             <EpicCard
               key={epic.id}

@@ -20,7 +20,7 @@ export function AppHeader({ projectName, projectConfig, onNewClick }: AppHeaderP
   return (
     <>
       <header className="border-b bg-accent/50">
-        <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2 md:gap-6">
             <div className="flex items-center gap-2">
               <GitBranchPlus />
@@ -40,7 +40,7 @@ export function AppHeader({ projectName, projectConfig, onNewClick }: AppHeaderP
           />
         </div>
 
-        <div className="flex md:hidden border-t px-4 py-1.5">
+        <div className="flex md:hidden border-t px-4 py-2">
           <AppNavigation />
         </div>
       </header>

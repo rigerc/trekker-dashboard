@@ -88,7 +88,7 @@ export function TaskEdit({
       onDeleteConfirm={onDeleteConfirm}
       onDeleteCancel={onDeleteCancel}
     >
-      <form id="task-edit-form" onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 p-4">
+      <form id="task-edit-form" onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5 p-5">
         <div className="space-y-2">
           <Label>Title</Label>
           <Input

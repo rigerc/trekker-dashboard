@@ -24,7 +24,7 @@ export function CommentComposer({
   const isDisabled = isSubmitting || !author.trim() || !content.trim();
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <Input
         placeholder="Your name"
         value={author}

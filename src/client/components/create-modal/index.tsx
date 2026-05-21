@@ -64,7 +64,7 @@ export function CreateModal({
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="p-0 flex flex-col w-full sm:max-w-md gap-0">
-        <SheetHeader className="shrink-0 border-b p-4">
+        <SheetHeader className="shrink-0 border-b px-5 py-4">
           <SheetTitle className="flex items-center gap-2">
             <Icon className="h-5 w-5" />
             Create New {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -72,7 +72,7 @@ export function CreateModal({
         </SheetHeader>
 
         <ScrollArea className="flex-1 min-h-0" showScrollbar>
-          <form id="create-form" onSubmit={handleSubmit} className="p-4 space-y-4">
+          <form id="create-form" onSubmit={handleSubmit} className="p-5 space-y-5">
             <div className="space-y-2">
               <Label>Type</Label>
               <Select
@@ -109,7 +109,7 @@ export function CreateModal({
           </form>
         </ScrollArea>
 
-        <SheetFooter className="shrink-0 border-t p-4">
+        <SheetFooter className="shrink-0 border-t px-5 py-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>

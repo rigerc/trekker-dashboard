@@ -35,13 +35,13 @@ export function DetailModalShell({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-4xl p-0 gap-0 max-h-[90vh] overflow-hidden">
-        <div className="p-4 border-b flex items-center justify-between">
+        <div className="px-5 py-4 border-b flex items-center justify-between">
           <Breadcrumb items={breadcrumbItems} />
         </div>
 
         <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
           <div className="flex flex-col min-w-0">
-            <div className="px-4 pt-4 pb-2 flex justify-between items-start">
+            <div className="px-6 pt-5 pb-2 flex justify-between items-start">
               <h2 className="text-xl font-semibold">{title}</h2>
               <Button variant="ghost" size="sm" onClick={onEdit}>
                 <Pencil className="mr-1 h-4 w-4" />
@@ -49,7 +49,7 @@ export function DetailModalShell({
               </Button>
             </div>
 
-            <div className="px-4 pb-4">
+            <div className="px-6 pb-5">
               <h4 className="text-xs uppercase text-muted-foreground font-semibold mb-2">
                 Description
               </h4>

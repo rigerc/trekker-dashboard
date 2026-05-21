@@ -21,10 +21,10 @@ export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
   return (
     <div
       data-task-id={task.id}
-      className={`p-3 cursor-pointer hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words`}
+      className={`p-4 cursor-pointer hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words`}
       onClick={onClick}
     >
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
           <SquareCheck width={16} />
           <span className="font-mono text-xs font-medium text-foreground">{task.id}</span>
@@ -32,14 +32,14 @@ export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
         <PriorityBadge priority={task.priority} />
       </div>
 
-      <h4 className="text-sm font-semibold mb-2">{task.title}</h4>
+      <h4 className="text-sm font-semibold mb-2.5">{task.title}</h4>
 
       {task.description && (
-        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{task.description}</p>
+        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
       )}
 
       {(epicName || task.tags) && (
-        <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-wrap gap-2 mb-3">
           {epicName && (
             <p className="text-xs flex gap-2 items-center">
               <Layers width={16} />

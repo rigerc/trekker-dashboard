@@ -38,13 +38,13 @@ export function EditModalShell({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg p-0 gap-0 max-h-[90vh] overflow-hidden">
-        <div className="flex items-center border-b p-4">
+        <div className="flex items-center border-b px-5 py-4">
           <Breadcrumb items={breadcrumbItems} />
         </div>
 
         <div className="overflow-y-auto max-h-[calc(90vh-140px)]">{children}</div>
 
-        <div className="p-4 border-t flex items-center justify-between">
+        <div className="px-5 py-4 border-t flex items-center justify-between">
           <DeleteConfirmation
             isConfirming={isDeleting}
             entityName={entityName}

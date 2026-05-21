@@ -37,7 +37,7 @@ export function DetailsSection({
     <div>
       <SectionHeader>Details</SectionHeader>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <DetailRow label="Status">
           <StatusSelect
             value={task.status}

@@ -38,13 +38,13 @@ export function EpicSidebar({
   const completedTasks = epicTasks.filter((t) => isTerminalStatus(t.status)).length;
 
   return (
-    <div className="p-4 bg-muted/30 rounded-b-md">
+    <div className="p-5 bg-muted/30 rounded-b-md">
       <div className="space-y-6">
         {/* Details section */}
         <div>
           <SectionHeader>Details</SectionHeader>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Status</span>
               <StatusSelect

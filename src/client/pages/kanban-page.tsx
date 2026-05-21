@@ -46,7 +46,7 @@ export function KanbanPage() {
 
   return (
     <>
-      <main className="flex-1 p-4 overflow-hidden">
+      <main className="flex-1 p-5 overflow-hidden">
         <KanbanBoard
           tasks={tasks}
           epics={epics}

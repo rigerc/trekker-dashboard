@@ -42,7 +42,7 @@ export function TaskSidebar({
 
   return (
     <div className="bg-muted/50 rounded-b-md">
-      <div className="p-4 space-y-6">
+      <div className="p-5 space-y-6">
         <DetailsSection
           task={task}
           onStatusChange={onStatusChange}
