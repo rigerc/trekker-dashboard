@@ -63,6 +63,7 @@ export function createApp() {
     // SPA routes - serve index.html for client-side routing
     app.get('/', async () => serveIndex());
     app.get('/list', async () => serveIndex());
+    app.get('/graph', async () => serveIndex());
     app.get('/history', async () => serveIndex());
 
     // Serve static files (JS, CSS, images, etc.)

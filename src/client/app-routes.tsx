@@ -1,7 +1,7 @@
-import { History, Kanban, List, type LucideIcon } from 'lucide-react';
+import { GitBranch, History, Kanban, List, type LucideIcon } from 'lucide-react';
 import type { ComponentType } from 'react';
 
-import { HistoryPage, KanbanPage, ListPage } from '@/pages';
+import { DependencyGraphPage, HistoryPage, KanbanPage, ListPage } from '@/pages';
 
 interface AppRouteDefinition {
   path: string;
@@ -22,6 +22,12 @@ export const APP_ROUTES: AppRouteDefinition[] = [
     label: 'List',
     Icon: List,
     Page: ListPage,
+  },
+  {
+    path: '/graph',
+    label: 'Graph',
+    Icon: GitBranch,
+    Page: DependencyGraphPage,
   },
   {
     path: '/history',
