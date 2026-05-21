@@ -12,10 +12,15 @@ import {
 } from '@dnd-kit/core';
 import { useState } from 'react';
 
+import {
+  CardQuickActionsSheet,
+  type QuickActionItem,
+} from '@/components/kanban/card-quick-actions-sheet';
 import { EpicCard } from '@/components/kanban/epic-card';
 import { KanbanColumn } from '@/components/kanban/kanban-column';
 import { TaskCard } from '@/components/kanban/task-card';
 import { useDragStatusUpdate } from '@/hooks/use-drag-status-update';
+import { getErrorMessage } from '@/lib/errors';
 import { EPIC_STATUSES } from '@/lib/types';
 import type { Epic, Task } from '@/types';
 
@@ -54,7 +59,9 @@ export function KanbanBoard({
   onArchiveAllCompleted,
 }: KanbanBoardProps) {
   const [activeItem, setActiveItem] = useState<ActiveItem | null>(null);
-  const { mutate: updateStatus } = useDragStatusUpdate();
+  const [quickItem, setQuickItem] = useState<ActiveItem | null>(null);
+  const [quickActionError, setQuickActionError] = useState<string | null>(null);
+  const quickUpdate = useDragStatusUpdate();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -98,7 +105,7 @@ export function KanbanBoard({
       return;
     }
 
-    updateStatus({ type, id, status: newStatus });
+    quickUpdate.mutate({ type, id, status: newStatus });
   }
 
   function handleDragCancel() {
@@ -115,6 +122,20 @@ export function KanbanBoard({
     activeEpic = epics.find((e) => e.id === activeItem.id) ?? null;
   }
 
+  let quickActionItem: QuickActionItem | null = null;
+  if (quickItem?.type === 'task') {
+    const task = tasks.find((t) => t.id === quickItem.id);
+    if (task) {
+      quickActionItem = { type: 'task', item: task };
+    }
+  }
+  if (quickItem?.type === 'epic') {
+    const epic = epics.find((e) => e.id === quickItem.id);
+    if (epic) {
+      quickActionItem = { type: 'epic', item: epic };
+    }
+  }
+
   const getEpicName = (epicId: string | null) => {
     if (!epicId) return null;
     return epics.find((e) => e.id === epicId)?.title ?? null;
@@ -127,6 +148,41 @@ export function KanbanBoard({
       completed: epicTasks.filter((t) => t.status === 'completed').length,
     };
   };
+
+  function openQuickActions(item: ActiveItem) {
+    setQuickActionError(null);
+    setQuickItem(item);
+  }
+
+  function closeQuickActions(open: boolean) {
+    if (!open) {
+      setQuickItem(null);
+      setQuickActionError(null);
+    }
+  }
+
+  async function updateQuickAction(payload: { status?: string; priority?: number }) {
+    if (!quickItem) return;
+
+    setQuickActionError(null);
+    try {
+      await quickUpdate.mutateAsync({ ...quickItem, ...payload });
+      setQuickItem(null);
+    } catch (error) {
+      setQuickActionError(getErrorMessage(error, 'Could not update card'));
+    }
+  }
+
+  function openQuickActionDetails() {
+    if (!quickActionItem) return;
+
+    if (quickActionItem.type === 'task') {
+      onTaskClick(quickActionItem.item);
+    } else {
+      onEpicClick(quickActionItem.item);
+    }
+    setQuickItem(null);
+  }
 
   return (
     <DndContext
@@ -148,6 +204,8 @@ export function KanbanBoard({
             onAddClick={() => onAddClick(column.key)}
             onTaskClick={onTaskClick}
             onEpicClick={onEpicClick}
+            onTaskLongPress={(task) => openQuickActions({ type: 'task', id: task.id })}
+            onEpicLongPress={(epic) => openQuickActions({ type: 'epic', id: epic.id })}
             onArchiveAll={getArchiveHandler(column.key)}
             activeItem={activeItem}
           />
@@ -175,6 +233,17 @@ export function KanbanBoard({
           </div>
         )}
       </DragOverlay>
+
+      <CardQuickActionsSheet
+        item={quickActionItem}
+        open={Boolean(quickActionItem)}
+        isSaving={quickUpdate.isPending}
+        errorMessage={quickActionError}
+        onOpenChange={closeQuickActions}
+        onOpenDetails={openQuickActionDetails}
+        onStatusChange={(status) => void updateQuickAction({ status })}
+        onPriorityChange={(priority) => void updateQuickAction({ priority })}
+      />
     </DndContext>
   );
 }

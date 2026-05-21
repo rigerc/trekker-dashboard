@@ -41,9 +41,10 @@ const nativeSelectStyles =
 export function ColumnFilter({ value, onChange, label }: ColumnFilterProps) {
   const [open, setOpen] = useState(false);
   const active = isFilterActive(value);
-  const buttonLabel = active
-    ? `Edit ${label} column filter, filter active`
-    : `Filter ${label} column`;
+  let buttonLabel = `Filter ${label} column`;
+  if (active) {
+    buttonLabel = `Edit ${label} column filter, filter active`;
+  }
 
   return (
     <div className="relative">

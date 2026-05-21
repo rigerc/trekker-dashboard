@@ -4,6 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Layers } from 'lucide-react';
 
+import { useLongPress } from '@/components/kanban/use-long-press';
 import { PriorityBadge } from '@/components/priority-badge';
 import { Progress } from '@/components/ui/progress';
 import { FULL_PERCENTAGE } from '@/lib/constants';
@@ -15,9 +16,10 @@ interface EpicCardProps {
   epic: Epic;
   taskCount: { total: number; completed: number };
   onClick: () => void;
+  onLongPress?: () => void;
 }
 
-export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
+export function EpicCard({ epic, taskCount, onClick, onLongPress }: EpicCardProps) {
   let percentage = 0;
   if (taskCount.total > 0) {
     percentage = Math.round((taskCount.completed / taskCount.total) * FULL_PERCENTAGE);
@@ -33,18 +35,38 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
     style = { transform: CSS.Translate.toString(transform) };
   }
 
+  const { isPressing, ...longPress } = useLongPress({
+    onLongPress: () => onLongPress?.(),
+  });
+  const draggableListeners = listeners as React.DOMAttributes<HTMLDivElement>;
+
+  function handleClick() {
+    if (longPress.shouldSuppressClick()) return;
+    onClick();
+  }
+
+  function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    longPress.onPointerDown(event);
+    draggableListeners.onPointerDown?.(event);
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
         'p-4 cursor-grab active:cursor-grabbing border border-border/80 bg-card hover:bg-accent/50 hover:ring-1 transition-all duration-100 break-words',
-        isDragging && 'opacity-0'
+        isDragging && 'opacity-0',
+        isPressing && 'ring-2 ring-ring scale-[0.98] transition-all duration-150 delay-150'
       )}
-      onClick={onClick}
+      onClick={handleClick}
       {...attributes}
       aria-label={`Open epic ${epic.id}: ${epic.title}`}
       {...listeners}
+      onPointerDown={handlePointerDown}
+      onPointerMove={longPress.onPointerMove}
+      onPointerCancel={longPress.onPointerCancel}
+      onPointerUp={longPress.onPointerUp}
     >
       <div className="flex items-start justify-between gap-3">
         <h4 className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground">

@@ -33,6 +33,8 @@ interface KanbanColumnProps {
   onAddClick: () => void;
   onTaskClick: (task: Task) => void;
   onEpicClick: (epic: Epic) => void;
+  onTaskLongPress?: (task: Task) => void;
+  onEpicLongPress?: (epic: Epic) => void;
   onArchiveAll?: () => void;
   activeItem: ActiveItem | null;
 }
@@ -62,6 +64,8 @@ export function KanbanColumn({
   onAddClick,
   onTaskClick,
   onEpicClick,
+  onTaskLongPress,
+  onEpicLongPress,
   onArchiveAll,
   activeItem,
 }: KanbanColumnProps) {
@@ -159,6 +163,7 @@ export function KanbanColumn({
               epic={epic}
               taskCount={getTaskCountForEpic(epic.id)}
               onClick={() => onEpicClick(epic)}
+              onLongPress={() => onEpicLongPress?.(epic)}
             />
           ))}
           {filteredTasks.map((task) => (
@@ -168,6 +173,7 @@ export function KanbanColumn({
               epicName={getEpicName(task.epicId)}
               subtasks={getSubtasks(task.id)}
               onClick={() => onTaskClick(task)}
+              onLongPress={() => onTaskLongPress?.(task)}
             />
           ))}
           {totalCount === 0 && (

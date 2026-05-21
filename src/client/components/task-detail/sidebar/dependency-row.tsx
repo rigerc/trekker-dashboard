@@ -23,8 +23,17 @@ export function DependencyRow({
   onOpen,
   onRemove,
 }: DependencyRowProps) {
-  const label = variant === 'depends' ? 'Needs' : 'Blocks';
-  const Icon = variant === 'depends' ? ArrowLeftToLine : ArrowRightFromLine;
+  let label = 'Blocks';
+  let Icon = ArrowRightFromLine;
+  if (variant === 'depends') {
+    label = 'Needs';
+    Icon = ArrowLeftToLine;
+  }
+
+  let title = `${label} ${taskId}`;
+  if (task) {
+    title = `${label} ${task.id}: ${task.title}`;
+  }
 
   return (
     <div
@@ -42,7 +51,7 @@ export function DependencyRow({
         className="flex min-w-0 flex-1 items-center gap-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         onClick={onOpen}
         disabled={isRemoving}
-        title={task ? `${label} ${task.id}: ${task.title}` : `${label} ${taskId}`}
+        title={title}
       >
         <Icon className="h-3.5 w-3.5 shrink-0" />
         <span className="shrink-0 font-medium">{label}</span>

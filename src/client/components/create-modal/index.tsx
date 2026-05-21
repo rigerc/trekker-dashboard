@@ -6,16 +6,9 @@ import { useEffect, useState } from 'react';
 import { CreateForm } from '@/components/create-modal/create-form';
 import { useCreateForm } from '@/components/create-modal/use-create-form';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 import type { CreateType, Epic, Task } from '@/types';
 
 interface CreateDrawerProps {
@@ -59,46 +52,42 @@ export function CreateModal({
     }
   }, [open, defaultType]);
 
-  const Icon = TYPE_OPTIONS.find((t) => t.value === type)?.icon || SquareCheck;
+  let typeLabel = 'Task';
+  const found = TYPE_OPTIONS.find((t) => t.value === type);
+  if (found) {
+    typeLabel = found.label;
+  }
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="p-0 flex flex-col w-full sm:max-w-md gap-0">
-        <SheetHeader className="shrink-0 border-b px-5 py-4">
-          <SheetTitle className="flex items-center gap-2">
-            <Icon className="h-5 w-5" />
-            Create New {type.charAt(0).toUpperCase() + type.slice(1)}
-          </SheetTitle>
+        <SheetHeader className="shrink-0 border-b px-5 pt-4 pb-3 space-y-3">
+          <SheetTitle className="text-base">New {typeLabel}</SheetTitle>
+
+          <div className="flex gap-0.5 rounded-lg bg-muted p-1">
+            {TYPE_OPTIONS.map(({ value, label, icon: TypeIcon }) => {
+              const isActive = type === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setType(value as CreateType)}
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    isActive && 'bg-background text-foreground shadow-sm',
+                    !isActive && 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <TypeIcon className="h-3.5 w-3.5" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </SheetHeader>
 
         <ScrollArea className="flex-1 min-h-0" showScrollbar>
-          <form id="create-form" onSubmit={handleSubmit} className="p-5 space-y-5">
-            <div className="space-y-2">
-              <Label>Type</Label>
-              <Select
-                value={type}
-                onValueChange={(v) => {
-                  if (TYPE_OPTIONS.some((opt) => opt.value === v)) {
-                    setType(v as CreateType);
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TYPE_OPTIONS.map(({ value, label, icon: TypeIcon }) => (
-                    <SelectItem key={value} value={value}>
-                      <div className="flex items-center gap-2">
-                        <TypeIcon className="h-4 w-4" />
-                        {label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
+          <form id="create-form" onSubmit={handleSubmit} className="p-5">
             <CreateForm
               key={type}
               form={form}
@@ -120,7 +109,7 @@ export function CreateModal({
             loading={isSubmitting}
             loadingText="Creating"
           >
-            Create
+            Create {typeLabel}
           </Button>
         </SheetFooter>
       </SheetContent>
