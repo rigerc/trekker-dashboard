@@ -1,12 +1,12 @@
 'use client';
 
+import { Circle, Flag, Layers, Tag } from 'lucide-react';
 import type { UseFormReturn } from 'react-hook-form';
 
 import type { BreadcrumbItem } from '@/components/breadcrumb';
 import { EditModalShell, PrioritySelect, StatusSelect } from '@/components/shared';
 import type { TaskFormData } from '@/components/task-detail/schema';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -17,6 +17,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { TASK_STATUSES } from '@/lib/constants';
 import type { Epic } from '@/types';
+
+const INLINE_TRIGGER =
+  'w-auto h-9 border-none shadow-none bg-transparent px-2.5 text-sm hover:bg-accent/60';
 
 interface TaskEditProps {
   form: UseFormReturn<TaskFormData>;
@@ -70,7 +73,6 @@ export function TaskEdit({
       setValue('epicId', null);
       return;
     }
-
     setValue('epicId', value);
   };
 
@@ -88,67 +90,86 @@ export function TaskEdit({
       onDeleteConfirm={onDeleteConfirm}
       onDeleteCancel={onDeleteCancel}
     >
-      <form id="task-edit-form" onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5 p-5">
-        <div className="space-y-2">
-          <Label>Title</Label>
-          <Input
-            value={title}
-            onChange={(e) => setValue('title', e.target.value)}
-            placeholder="Task title"
-            className="text-lg font-semibold"
-          />
-          {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
-        </div>
+      <form id="task-edit-form" onSubmit={handleSubmit(handleFormSubmit)} className="p-5">
+        <Input
+          value={title}
+          onChange={(e) => setValue('title', e.target.value)}
+          placeholder="Task title..."
+          className="h-auto border-none shadow-none bg-transparent px-0 text-xl font-semibold placeholder:text-muted-foreground/40 focus-visible:ring-0"
+        />
+        {errors.title && <p className="mt-1 text-xs text-destructive">{errors.title.message}</p>}
 
-        <div className="space-y-2">
-          <Label>Description</Label>
-          <Textarea
-            value={description}
-            onChange={(e) => setValue('description', e.target.value)}
-            placeholder="Task description"
-            rows={4}
-          />
-        </div>
+        <Textarea
+          value={description}
+          onChange={(e) => setValue('description', e.target.value)}
+          placeholder="Add a description..."
+          rows={4}
+          className="mt-4 min-h-0 border-none shadow-none bg-transparent px-0 py-1 resize-none text-sm leading-6 placeholder:text-muted-foreground/40 focus-visible:ring-0"
+        />
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <StatusSelect
-              value={status}
-              onChange={(v) => setValue('status', v)}
-              statuses={TASK_STATUSES}
-            />
+        <div className="mt-5 border-t pt-4">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+            Properties
+          </p>
+          <div className="divide-y">
+            <div className="flex items-center justify-between py-2.5">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Circle className="h-3.5 w-3.5" />
+                Status
+              </span>
+              <StatusSelect
+                value={status}
+                onChange={(v) => setValue('status', v)}
+                statuses={TASK_STATUSES}
+                triggerClassName={INLINE_TRIGGER}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2.5">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Flag className="h-3.5 w-3.5" />
+                Priority
+              </span>
+              <PrioritySelect
+                value={priority}
+                onChange={(v) => setValue('priority', v)}
+                triggerClassName={INLINE_TRIGGER}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2.5">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Layers className="h-3.5 w-3.5" />
+                Epic
+              </span>
+              <Select value={epicId || 'none'} onValueChange={handleEpicChange}>
+                <SelectTrigger className={INLINE_TRIGGER}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Epic</SelectItem>
+                  {epics.map((epic) => (
+                    <SelectItem key={epic.id} value={epic.id}>
+                      {epic.id}: {epic.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between py-2.5">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Tag className="h-3.5 w-3.5" />
+                Tags
+              </span>
+              <Input
+                value={tags}
+                onChange={(e) => setValue('tags', e.target.value)}
+                placeholder="bug, frontend..."
+                className="w-48 h-9 border-none shadow-none bg-transparent px-2.5 text-sm text-right placeholder:text-muted-foreground/40 focus-visible:ring-0"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label>Priority</Label>
-            <PrioritySelect value={priority} onChange={(v) => setValue('priority', v)} />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Tags (comma-separated)</Label>
-          <Input
-            value={tags}
-            onChange={(e) => setValue('tags', e.target.value)}
-            placeholder="bug, frontend, urgent"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Epic</Label>
-          <Select value={epicId || 'none'} onValueChange={handleEpicChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No Epic</SelectItem>
-              {epics.map((epic) => (
-                <SelectItem key={epic.id} value={epic.id}>
-                  {epic.id}: {epic.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </form>
     </EditModalShell>

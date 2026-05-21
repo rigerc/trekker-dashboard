@@ -139,7 +139,7 @@ export function SearchableSelect({
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8"
+              className="h-9"
             />
           </div>
           <div className="max-h-[200px] overflow-y-auto p-1">{optionsContent}</div>

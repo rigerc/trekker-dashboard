@@ -1,14 +1,17 @@
 'use client';
 
+import { Circle, Flag } from 'lucide-react';
 import type { UseFormReturn } from 'react-hook-form';
 
 import type { BreadcrumbItem } from '@/components/breadcrumb';
 import type { EpicFormData } from '@/components/epic-detail/schema';
 import { EditModalShell, PrioritySelect, StatusSelect } from '@/components/shared';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { EPIC_STATUSES } from '@/lib/constants';
+
+const INLINE_TRIGGER =
+  'w-auto h-9 border-none shadow-none bg-transparent px-2.5 text-sm hover:bg-accent/60';
 
 interface EpicEditProps {
   form: UseFormReturn<EpicFormData>;
@@ -67,43 +70,52 @@ export function EpicEdit({
       onDeleteConfirm={onDeleteConfirm}
       onDeleteCancel={onDeleteCancel}
     >
-      <form id="epic-edit-form" onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5 p-5">
-        {/* Title */}
-        <div className="space-y-2">
-          <Label>Title</Label>
-          <Input
-            value={title}
-            onChange={(e) => setValue('title', e.target.value)}
-            placeholder="Epic title"
-            className="text-lg font-semibold"
-          />
-          {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
-        </div>
+      <form id="epic-edit-form" onSubmit={handleSubmit(handleFormSubmit)} className="p-5">
+        <Input
+          value={title}
+          onChange={(e) => setValue('title', e.target.value)}
+          placeholder="Epic title..."
+          className="h-auto border-none shadow-none bg-transparent px-0 text-xl font-semibold placeholder:text-muted-foreground/40 focus-visible:ring-0"
+        />
+        {errors.title && <p className="mt-1 text-xs text-destructive">{errors.title.message}</p>}
 
-        {/* Description */}
-        <div className="space-y-2">
-          <Label>Description</Label>
-          <Textarea
-            value={description}
-            onChange={(e) => setValue('description', e.target.value)}
-            placeholder="Epic description"
-            rows={4}
-          />
-        </div>
+        <Textarea
+          value={description}
+          onChange={(e) => setValue('description', e.target.value)}
+          placeholder="Add a description..."
+          rows={4}
+          className="mt-4 min-h-0 border-none shadow-none bg-transparent px-0 py-1 resize-none text-sm leading-6 placeholder:text-muted-foreground/40 focus-visible:ring-0"
+        />
 
-        {/* Status and Priority */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <StatusSelect
-              value={status}
-              onChange={(v) => setValue('status', v)}
-              statuses={EPIC_STATUSES}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Priority</Label>
-            <PrioritySelect value={priority} onChange={(v) => setValue('priority', v)} />
+        <div className="mt-5 border-t pt-4">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+            Properties
+          </p>
+          <div className="divide-y">
+            <div className="flex items-center justify-between py-2.5">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Circle className="h-3.5 w-3.5" />
+                Status
+              </span>
+              <StatusSelect
+                value={status}
+                onChange={(v) => setValue('status', v)}
+                statuses={EPIC_STATUSES}
+                triggerClassName={INLINE_TRIGGER}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2.5">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Flag className="h-3.5 w-3.5" />
+                Priority
+              </span>
+              <PrioritySelect
+                value={priority}
+                onChange={(v) => setValue('priority', v)}
+                triggerClassName={INLINE_TRIGGER}
+              />
+            </div>
           </div>
         </div>
       </form>
