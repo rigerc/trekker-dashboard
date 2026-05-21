@@ -55,7 +55,7 @@ export function EpicCard({ epic, taskCount, onClick, onLongPress }: EpicCardProp
       ref={setNodeRef}
       style={style}
       className={cn(
-        'p-4 cursor-grab active:cursor-grabbing border border-border/80 bg-card hover:bg-accent/50 hover:ring-1 transition-all duration-100 break-words',
+        'p-4 cursor-grab active:cursor-grabbing border border-border/80 bg-card hover:bg-accent/50 hover:ring-1 transition-all duration-100 break-words border-l-[3px] border-l-primary/20',
         isDragging && 'opacity-0',
         isPressing && 'ring-2 ring-ring scale-[0.98] transition-all duration-150 delay-150'
       )}

@@ -54,7 +54,10 @@ export function ListPageResults({
               {items.map((item) => (
                 <tr
                   key={item.id}
-                  className="cursor-pointer border-t transition-colors hover:bg-muted/30"
+                  className={cn(
+                    'cursor-pointer border-t transition-colors hover:bg-muted/30',
+                    item.type === 'epic' && 'border-l-[3px] border-l-primary/20 bg-primary/[0.02]'
+                  )}
                   onClick={() => onRowClick(item)}
                 >
                   <td className="px-4 py-3 font-mono text-sm text-muted-foreground">{item.id}</td>
@@ -98,7 +101,10 @@ export function ListPageResults({
             {items.map((item) => (
               <div
                 key={item.id}
-                className="px-4 py-3 cursor-pointer transition-colors hover:bg-muted/30 active:bg-muted/50"
+                className={cn(
+                  'px-4 py-3 cursor-pointer transition-colors hover:bg-muted/30 active:bg-muted/50',
+                  item.type === 'epic' && 'border-l-[3px] border-l-primary/20 bg-primary/[0.02]'
+                )}
                 onClick={() => onRowClick(item)}
               >
                 <div className="flex items-start gap-3 mb-1">
