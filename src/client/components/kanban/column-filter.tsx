@@ -32,14 +32,18 @@ function isFilterActive(filter: ColumnFilterState): boolean {
 interface ColumnFilterProps {
   value: ColumnFilterState;
   onChange: (value: ColumnFilterState) => void;
+  label: string;
 }
 
 const nativeSelectStyles =
   'h-8 w-full rounded-md border bg-transparent px-2 text-sm outline-none focus:ring-1 focus:ring-ring';
 
-export function ColumnFilter({ value, onChange }: ColumnFilterProps) {
+export function ColumnFilter({ value, onChange, label }: ColumnFilterProps) {
   const [open, setOpen] = useState(false);
   const active = isFilterActive(value);
+  const buttonLabel = active
+    ? `Edit ${label} column filter, filter active`
+    : `Filter ${label} column`;
 
   return (
     <div className="relative">
@@ -48,10 +52,14 @@ export function ColumnFilter({ value, onChange }: ColumnFilterProps) {
         size="icon"
         className="h-7 w-7"
         onClick={() => setOpen(!open)}
-        title="Sort & filter"
+        title={buttonLabel}
+        aria-label={buttonLabel}
+        aria-expanded={open}
       >
         <SlidersHorizontal className="h-4 w-4" />
-        {active && <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-ring" />}
+        {active && (
+          <span className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-ring" aria-hidden />
+        )}
       </Button>
 
       <NativePopover
@@ -59,6 +67,7 @@ export function ColumnFilter({ value, onChange }: ColumnFilterProps) {
         onClose={() => setOpen(false)}
         className="w-52 flex flex-col gap-3"
       >
+        <p className="text-xs font-semibold text-foreground">{label} view</p>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-muted-foreground">Sort by</label>
           <select
