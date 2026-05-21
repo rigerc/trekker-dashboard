@@ -66,6 +66,7 @@ export function ColumnFilter({ value, onChange, label }: ColumnFilterProps) {
         open={open}
         onClose={() => setOpen(false)}
         className="w-52 flex flex-col gap-3"
+        ariaLabel={`${label} column filter`}
       >
         <p className="text-xs font-semibold text-foreground">{label} view</p>
         <div className="flex flex-col gap-1">

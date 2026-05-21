@@ -43,6 +43,7 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
       )}
       onClick={onClick}
       {...attributes}
+      aria-label={`Open epic ${epic.id}: ${epic.title}`}
       {...listeners}
     >
       <div className="flex items-start justify-between gap-3">

@@ -12,6 +12,7 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
     <Badge
       className="font-mono text-xs"
       title={PRIORITY_LABELS[priority]}
+      aria-label={`Priority ${priority}: ${PRIORITY_LABELS[priority]}`}
       style={{
         backgroundColor: style.bg,
         color: style.text,

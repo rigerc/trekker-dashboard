@@ -8,9 +8,16 @@ interface NativePopoverProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  ariaLabel?: string;
 }
 
-export function NativePopover({ open, onClose, children, className = '' }: NativePopoverProps) {
+export function NativePopover({
+  open,
+  onClose,
+  children,
+  className = '',
+  ariaLabel,
+}: NativePopoverProps) {
   const ref = useRef<HTMLDivElement>(null);
   useOnClickOutside(ref as React.RefObject<HTMLElement>, onClose);
 
@@ -19,6 +26,8 @@ export function NativePopover({ open, onClose, children, className = '' }: Nativ
   return (
     <div
       ref={ref}
+      role="dialog"
+      aria-label={ariaLabel}
       className={`absolute right-0 top-full mt-1 z-50 rounded-md border bg-popover p-3 shadow-md ${className}`}
     >
       {children}

@@ -43,6 +43,7 @@ export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
       )}
       onClick={onClick}
       {...attributes}
+      aria-label={`Open task ${task.id}: ${task.title}`}
       {...listeners}
     >
       <div className="flex items-start justify-between gap-3">

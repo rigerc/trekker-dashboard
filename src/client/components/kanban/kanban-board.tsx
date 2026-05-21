@@ -5,6 +5,7 @@ import {
   type DragEndEvent,
   DragOverlay,
   type DragStartEvent,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -55,7 +56,10 @@ export function KanbanBoard({
   const [activeItem, setActiveItem] = useState<ActiveItem | null>(null);
   const { mutate: updateStatus } = useDragStatusUpdate();
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor)
+  );
 
   const topLevelTasks = tasks.filter((task) => !task.parentTaskId);
 
