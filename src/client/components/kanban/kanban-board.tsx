@@ -10,7 +10,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import {
   CardQuickActionsSheet,
@@ -25,7 +25,6 @@ import { EPIC_STATUSES } from '@/lib/types';
 import type { Epic, Task } from '@/types';
 
 function noop(): void {
-  // overlay cards are visual-only; clicks are intentionally suppressed
   return undefined;
 }
 
@@ -68,12 +67,128 @@ export function KanbanBoard({
     useSensor(KeyboardSensor)
   );
 
-  const topLevelTasks = tasks.filter((task) => !task.parentTaskId);
+  const topLevelTasks = useMemo(() => tasks.filter((task) => !task.parentTaskId), [tasks]);
 
-  const getTasksByStatus = (status: string) =>
-    topLevelTasks.filter((task) => task.status === status);
+  const tasksByStatus = useMemo(() => {
+    const map = new Map<string, Task[]>();
+    for (const task of topLevelTasks) {
+      const group = map.get(task.status);
+      if (group) {
+        group.push(task);
+      } else {
+        map.set(task.status, [task]);
+      }
+    }
+    return map;
+  }, [topLevelTasks]);
 
-  const getEpicsByStatus = (status: string) => epics.filter((epic) => epic.status === status);
+  const epicsByStatus = useMemo(() => {
+    const map = new Map<string, Epic[]>();
+    for (const epic of epics) {
+      const group = map.get(epic.status);
+      if (group) {
+        group.push(epic);
+      } else {
+        map.set(epic.status, [epic]);
+      }
+    }
+    return map;
+  }, [epics]);
+
+  const taskById = useMemo(() => {
+    const map = new Map<string, Task>();
+    for (const task of tasks) {
+      map.set(task.id, task);
+    }
+    return map;
+  }, [tasks]);
+
+  const epicMap = useMemo(() => {
+    const map = new Map<string, Epic>();
+    for (const epic of epics) {
+      map.set(epic.id, epic);
+    }
+    return map;
+  }, [epics]);
+
+  const subtasksByParent = useMemo(() => {
+    const map = new Map<string, Task[]>();
+    for (const task of tasks) {
+      if (!task.parentTaskId) continue;
+      const group = map.get(task.parentTaskId);
+      if (group) {
+        group.push(task);
+      } else {
+        map.set(task.parentTaskId, [task]);
+      }
+    }
+    return map;
+  }, [tasks]);
+
+  const tasksByEpic = useMemo(() => {
+    const map = new Map<string, Task[]>();
+    for (const task of tasks) {
+      if (!task.epicId || task.parentTaskId) continue;
+      const group = map.get(task.epicId);
+      if (group) {
+        group.push(task);
+      } else {
+        map.set(task.epicId, [task]);
+      }
+    }
+    return map;
+  }, [tasks]);
+
+  const activeTask = useMemo(() => {
+    if (activeItem?.type !== 'task') return null;
+    return taskById.get(activeItem.id) ?? null;
+  }, [activeItem, taskById]);
+
+  const activeEpic = useMemo(() => {
+    if (activeItem?.type !== 'epic') return null;
+    return epicMap.get(activeItem.id) ?? null;
+  }, [activeItem, epicMap]);
+
+  const quickActionItem = useMemo((): QuickActionItem | null => {
+    if (!quickItem) return null;
+    if (quickItem.type === 'task') {
+      const task = taskById.get(quickItem.id);
+      if (task) {
+        return { type: 'task', item: task };
+      }
+      return null;
+    }
+    const epic = epicMap.get(quickItem.id);
+    if (epic) {
+      return { type: 'epic', item: epic };
+    }
+    return null;
+  }, [quickItem, taskById, epicMap]);
+
+  const getEpicName = useCallback(
+    (epicId: string | null) => {
+      if (!epicId) return null;
+      return epicMap.get(epicId)?.title ?? null;
+    },
+    [epicMap]
+  );
+
+  const getSubtasks = useCallback(
+    (taskId: string) => subtasksByParent.get(taskId) ?? [],
+    [subtasksByParent]
+  );
+
+  const getTaskCountForEpic = useCallback(
+    (epicId: string) => {
+      const epicTasks = tasksByEpic.get(epicId) ?? [];
+      let completed = 0;
+      for (const t of epicTasks) {
+        if (t.status === 'completed') completed++;
+      }
+      return { total: epicTasks.length, completed };
+    },
+    [tasksByEpic]
+  );
 
   function getArchiveHandler(columnKey: (typeof STATUS_COLUMNS)[number]['key']) {
     if (columnKey === 'completed') {
@@ -81,99 +196,68 @@ export function KanbanBoard({
     }
   }
 
-  function handleDragStart(event: DragStartEvent) {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const data = event.active.data.current as { type: 'task' | 'epic'; id: string };
     setActiveItem({ type: data.type, id: data.id });
-  }
+  }, []);
 
-  function handleDragEnd(event: DragEndEvent) {
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveItem(null);
+
+      const { active, over } = event;
+      if (!over) return;
+
+      const { type, id, currentStatus } = active.data.current as {
+        type: 'task' | 'epic';
+        id: string;
+        currentStatus: string;
+      };
+      const newStatus = (over.data.current as { status: string }).status;
+
+      if (newStatus === currentStatus) return;
+
+      if (type === 'epic' && !EPIC_STATUSES.includes(newStatus as (typeof EPIC_STATUSES)[number])) {
+        return;
+      }
+
+      quickUpdate.mutate({ type, id, status: newStatus });
+    },
+    [quickUpdate]
+  );
+
+  const handleDragCancel = useCallback(() => {
     setActiveItem(null);
+  }, []);
 
-    const { active, over } = event;
-    if (!over) return;
-
-    const { type, id, currentStatus } = active.data.current as {
-      type: 'task' | 'epic';
-      id: string;
-      currentStatus: string;
-    };
-    const newStatus = (over.data.current as { status: string }).status;
-
-    if (newStatus === currentStatus) return;
-
-    if (type === 'epic' && !EPIC_STATUSES.includes(newStatus as (typeof EPIC_STATUSES)[number])) {
-      return;
-    }
-
-    quickUpdate.mutate({ type, id, status: newStatus });
-  }
-
-  function handleDragCancel() {
-    setActiveItem(null);
-  }
-
-  // Data needed for the drag overlay
-  let activeTask: Task | null = null;
-  if (activeItem?.type === 'task') {
-    activeTask = tasks.find((t) => t.id === activeItem.id) ?? null;
-  }
-  let activeEpic: Epic | null = null;
-  if (activeItem?.type === 'epic') {
-    activeEpic = epics.find((e) => e.id === activeItem.id) ?? null;
-  }
-
-  let quickActionItem: QuickActionItem | null = null;
-  if (quickItem?.type === 'task') {
-    const task = tasks.find((t) => t.id === quickItem.id);
-    if (task) {
-      quickActionItem = { type: 'task', item: task };
-    }
-  }
-  if (quickItem?.type === 'epic') {
-    const epic = epics.find((e) => e.id === quickItem.id);
-    if (epic) {
-      quickActionItem = { type: 'epic', item: epic };
-    }
-  }
-
-  const getEpicName = (epicId: string | null) => {
-    if (!epicId) return null;
-    return epics.find((e) => e.id === epicId)?.title ?? null;
-  };
-  const getSubtasks = (taskId: string) => tasks.filter((t) => t.parentTaskId === taskId);
-  const getTaskCountForEpic = (epicId: string) => {
-    const epicTasks = tasks.filter((t) => t.epicId === epicId && !t.parentTaskId);
-    return {
-      total: epicTasks.length,
-      completed: epicTasks.filter((t) => t.status === 'completed').length,
-    };
-  };
-
-  function openQuickActions(item: ActiveItem) {
+  const openQuickActions = useCallback((item: ActiveItem) => {
     setQuickActionError(null);
     setQuickItem(item);
-  }
+  }, []);
 
-  function closeQuickActions(open: boolean) {
+  const closeQuickActions = useCallback((open: boolean) => {
     if (!open) {
       setQuickItem(null);
       setQuickActionError(null);
     }
-  }
+  }, []);
 
-  async function updateQuickAction(payload: { status?: string; priority?: number }) {
-    if (!quickItem) return;
+  const updateQuickAction = useCallback(
+    async (payload: { status?: string; priority?: number }) => {
+      if (!quickItem) return;
 
-    setQuickActionError(null);
-    try {
-      await quickUpdate.mutateAsync({ ...quickItem, ...payload });
-      setQuickItem(null);
-    } catch (error) {
-      setQuickActionError(getErrorMessage(error, 'Could not update card'));
-    }
-  }
+      setQuickActionError(null);
+      try {
+        await quickUpdate.mutateAsync({ ...quickItem, ...payload });
+        setQuickItem(null);
+      } catch (error) {
+        setQuickActionError(getErrorMessage(error, 'Could not update card'));
+      }
+    },
+    [quickItem, quickUpdate]
+  );
 
-  function openQuickActionDetails() {
+  const openQuickActionDetails = useCallback(() => {
     if (!quickActionItem) return;
 
     if (quickActionItem.type === 'task') {
@@ -182,7 +266,7 @@ export function KanbanBoard({
       onEpicClick(quickActionItem.item);
     }
     setQuickItem(null);
-  }
+  }, [quickActionItem, onTaskClick, onEpicClick]);
 
   return (
     <DndContext
@@ -197,8 +281,8 @@ export function KanbanBoard({
             key={column.key}
             label={column.label}
             status={column.key}
-            tasks={getTasksByStatus(column.key)}
-            epics={getEpicsByStatus(column.key)}
+            tasks={tasksByStatus.get(column.key) ?? []}
+            epics={epicsByStatus.get(column.key) ?? []}
             allTasks={tasks}
             allEpics={epics}
             onAddClick={() => onAddClick(column.key)}

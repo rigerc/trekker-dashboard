@@ -1,15 +1,17 @@
+import { Suspense } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
-import { APP_ROUTES } from '@/app-routes';
+import { APP_ROUTES, ROUTE_PAGES } from '@/app-routes';
 import { AppHeader } from '@/components/app-header';
 import { CreateModal } from '@/components/create-modal';
 import { ConnectionIndicator } from '@/components/shared/connection-indicator';
-import { useAppData } from '@/hooks/use-data';
+import { useAppData, useProject } from '@/hooks/use-data';
 import { useUIStore } from '@/stores';
 
 export function App() {
   const location = useLocation();
-  const { tasks, epics, project, refetch } = useAppData();
+  const { tasks, epics, refetch } = useAppData();
+  const { data: project } = useProject();
   const {
     connectionStatus,
     showCreateModal,
@@ -28,9 +30,26 @@ export function App() {
       />
 
       <Routes>
-        {APP_ROUTES.map(({ Page, path }) => (
-          <Route key={path} path={path} element={<Page />} />
-        ))}
+        {APP_ROUTES.map(({ path }) => {
+          const Page = ROUTE_PAGES[path as keyof typeof ROUTE_PAGES];
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center flex-1 p-8">
+                      <span className="text-muted-foreground">Loading...</span>
+                    </div>
+                  }
+                >
+                  <Page />
+                </Suspense>
+              }
+            />
+          );
+        })}
       </Routes>
 
       <footer className="px-4 py-2 border-t">

@@ -37,7 +37,7 @@ function useEpics() {
   });
 }
 
-function useProject() {
+export function useProject() {
   return useQuery({
     queryKey: ['project'],
     queryFn: fetchProject,
@@ -72,18 +72,15 @@ export function useUpdateProjectConfig() {
 export function useAppData() {
   const tasksQuery = useTasks();
   const epicsQuery = useEpics();
-  const projectQuery = useProject();
 
   return {
     tasks: tasksQuery.data ?? [],
     epics: epicsQuery.data ?? [],
-    project: projectQuery.data ?? null,
     isLoading: tasksQuery.isLoading || epicsQuery.isLoading,
     error: tasksQuery.error || epicsQuery.error,
     refetch: () => {
       tasksQuery.refetch();
       epicsQuery.refetch();
-      projectQuery.refetch();
     },
   };
 }

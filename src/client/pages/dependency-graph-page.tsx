@@ -65,16 +65,23 @@ export function DependencyGraphPage() {
   const blockedCount = graphTasks.filter((task) => task.dependsOn.length > 0).length;
   const blockerCount = graphTasks.filter((task) => task.blocks.length > 0).length;
 
-  let content = (
-    <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-      <GitBranch className="h-8 w-8 opacity-40" />
-      <span className="text-sm text-muted-foreground">No dependencies yet</span>
-      <span className="max-w-sm text-xs text-muted-foreground">
-        Open a task and add prerequisites or blockers to build the graph.
-      </span>
-    </div>
-  );
+  if (isLoading && tasks.length === 0) {
+    return (
+      <main className="flex flex-1 items-center justify-center p-5">
+        <span className="text-muted-foreground">Loading graph...</span>
+      </main>
+    );
+  }
 
+  if (error) {
+    return (
+      <main className="flex flex-1 items-center justify-center p-5">
+        <span className="text-destructive">Could not load dependency graph</span>
+      </main>
+    );
+  }
+
+  let content;
   if (graphTasks.length > 0) {
     content = (
       <div className="space-y-3 p-3">
@@ -88,20 +95,14 @@ export function DependencyGraphPage() {
         ))}
       </div>
     );
-  }
-
-  if (error) {
+  } else {
     content = (
-      <div className="flex h-full items-center justify-center">
-        <span className="text-destructive">Could not load dependency graph</span>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    content = (
-      <div className="flex h-full items-center justify-center">
-        <span className="text-muted-foreground">Loading graph...</span>
+      <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+        <GitBranch className="h-8 w-8 opacity-40" />
+        <span className="text-sm text-muted-foreground">No dependencies yet</span>
+        <span className="max-w-sm text-xs text-muted-foreground">
+          Open a task and add prerequisites or blockers to build the graph.
+        </span>
       </div>
     );
   }
