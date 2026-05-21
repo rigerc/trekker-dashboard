@@ -6,7 +6,11 @@ import { useState } from 'react';
 import { CommentSection } from '@/components/comment-section';
 import { Metadata } from '@/components/shared';
 import { HistoryTab } from '@/components/task-detail/history-tab';
-import { DetailsSection, LinksSection, SubtasksSection } from '@/components/task-detail/sidebar';
+import {
+  DependenciesSection,
+  DetailsSection,
+  SubtasksSection,
+} from '@/components/task-detail/sidebar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Epic, Task } from '@/types';
@@ -14,6 +18,7 @@ import type { Epic, Task } from '@/types';
 interface TaskSidebarProps {
   task: Task;
   subtasks: Task[];
+  allTasks: Task[];
   onStatusChange: (status: string) => void;
   onPriorityChange: (priority: number) => void;
   onTaskClick?: (task: Task) => void;
@@ -27,6 +32,7 @@ type TabType = 'comments' | 'history';
 export function TaskSidebar({
   task,
   subtasks,
+  allTasks,
   onStatusChange,
   onPriorityChange,
   onTaskClick,
@@ -51,9 +57,9 @@ export function TaskSidebar({
           getEpicById={getEpicById}
         />
 
-        <LinksSection
-          dependsOn={task.dependsOn}
-          blocks={task.blocks}
+        <DependenciesSection
+          task={task}
+          allTasks={allTasks}
           onTaskClick={onTaskClick}
           getTaskById={getTaskById}
         />

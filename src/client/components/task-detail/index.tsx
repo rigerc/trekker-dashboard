@@ -76,6 +76,7 @@ export function TaskDetailModal({
       <TaskView
         task={task}
         subtasks={subtasks}
+        allTasks={allTasks}
         breadcrumbItems={breadcrumbItems}
         status={status}
         priority={priority}

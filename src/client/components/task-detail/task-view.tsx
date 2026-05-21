@@ -8,6 +8,7 @@ import type { Epic, Task } from '@/types';
 interface TaskViewProps {
   task: Task;
   subtasks: Task[];
+  allTasks: Task[];
   breadcrumbItems: BreadcrumbItem[];
   status: string;
   priority: number;
@@ -25,6 +26,7 @@ interface TaskViewProps {
 export function TaskView({
   task,
   subtasks,
+  allTasks,
   breadcrumbItems,
   status,
   priority,
@@ -50,6 +52,7 @@ export function TaskView({
       <TaskSidebar
         task={{ ...task, status, priority }}
         subtasks={subtasks}
+        allTasks={allTasks}
         onStatusChange={onStatusChange}
         onPriorityChange={onPriorityChange}
         onTaskClick={onTaskClick}
