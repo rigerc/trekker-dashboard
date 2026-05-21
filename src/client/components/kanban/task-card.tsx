@@ -20,6 +20,7 @@ interface TaskCardProps {
 
 export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
   const completedSubtasks = subtasks.filter((s) => s.status === 'completed').length;
+  const hasDependencies = task.dependsOn.length > 0 || task.blocks.length > 0;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `task-${task.id}`,
@@ -44,68 +45,73 @@ export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
       {...attributes}
       {...listeners}
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          <SquareCheck width={16} />
-          <span className="font-mono text-xs font-medium text-foreground">{task.id}</span>
-        </div>
+      <div className="flex items-start justify-between gap-3">
+        <h4 className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground">
+          {task.title}
+        </h4>
         <PriorityBadge priority={task.priority} />
       </div>
 
-      <h4 className="text-sm font-semibold mb-2.5">{task.title}</h4>
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1 font-mono font-medium text-foreground/75">
+          <SquareCheck className="h-3.5 w-3.5" />
+          {task.id}
+        </span>
+        {epicName && (
+          <span className="inline-flex min-w-0 items-center gap-1">
+            <Layers className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{epicName}</span>
+          </span>
+        )}
+        <span>{formatRelativeTime(task.createdAt)}</span>
+      </div>
 
-      {task.description && (
-        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
+      {hasDependencies && (
+        <div className="mt-3 flex flex-wrap gap-1.5 border-t pt-3">
+          {task.blocks.map((blockId) => (
+            <span
+              key={blockId}
+              className="inline-flex items-center gap-1 rounded border border-rose-500/20 bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-medium text-rose-600 dark:text-rose-400"
+              title={`Blocks ${blockId}`}
+            >
+              <ArrowRightFromLine className="h-2.5 w-2.5" />
+              Blocks {blockId}
+            </span>
+          ))}
+          {task.dependsOn.map((depId) => (
+            <span
+              key={depId}
+              className="inline-flex items-center gap-1 rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+              title={`Depends on ${depId}`}
+            >
+              <ArrowLeftToLine className="h-2.5 w-2.5" />
+              Needs {depId}
+            </span>
+          ))}
+        </div>
       )}
 
-      {(epicName || task.tags) && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {epicName && (
-            <p className="text-xs flex gap-2 items-center">
-              <Layers width={16} />
-              {epicName}
-            </p>
-          )}
-          {task.tags?.split(',').map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
+      {task.description && (
+        <p className="mt-3 line-clamp-2 text-xs leading-5 text-muted-foreground">
+          {task.description}
+        </p>
+      )}
+
+      {task.tags && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {task.tags.split(',').map((tag) => (
+            <Badge key={tag} variant="outline" className="text-[10px] font-normal">
               {tag.trim()}
             </Badge>
           ))}
         </div>
       )}
 
-      {(task.dependsOn.length > 0 || task.blocks.length > 0) && (
-        <div className="pt-2 border-t flex flex-wrap gap-1">
-          {task.dependsOn.map((depId) => (
-            <span
-              key={depId}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400"
-              title={`Depends on ${depId}`}
-            >
-              <ArrowLeftToLine className="h-2.5 w-2.5" />
-              {depId}
-            </span>
-          ))}
-          {task.blocks.map((blockId) => (
-            <span
-              key={blockId}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-rose-500/10 text-rose-600 dark:text-rose-400"
-              title={`Blocks ${blockId}`}
-            >
-              <ArrowRightFromLine className="h-2.5 w-2.5" />
-              {blockId}
-            </span>
-          ))}
+      {subtasks.length > 0 && (
+        <div className="mt-3">
+          <SubtaskProgress completed={completedSubtasks} total={subtasks.length} />
         </div>
       )}
-
-      {subtasks.length > 0 && (
-        <SubtaskProgress completed={completedSubtasks} total={subtasks.length} />
-      )}
-
-      <p className="text-[10px] text-muted-foreground mt-1.5">
-        {formatRelativeTime(task.createdAt)}
-      </p>
     </div>
   );
 }

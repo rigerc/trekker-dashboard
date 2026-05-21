@@ -45,25 +45,29 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
       {...attributes}
       {...listeners}
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          <Layers width={16} />
-          <span className="font-mono text-xs font-medium text-foreground">{epic.id}</span>
-        </div>
+      <div className="flex items-start justify-between gap-3">
+        <h4 className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground">
+          {epic.title}
+        </h4>
         <PriorityBadge priority={epic.priority} />
       </div>
 
-      <h4 className="text-sm font-semibold mb-3">{epic.title}</h4>
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1 font-mono font-medium text-foreground/75">
+          <Layers className="h-3.5 w-3.5" />
+          {epic.id}
+        </span>
+        <span>{formatRelativeTime(epic.createdAt)}</span>
+      </div>
 
-      <div className="border-t pt-3 flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
+      <div className="mt-3 border-t pt-3">
+        <div className="mb-2 flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">
             {taskCount.completed}/{taskCount.total} tasks
-          </p>
-          <span className="text-[10px] text-muted-foreground font-mono">{percentage}%</span>
+          </span>
+          <span className="font-mono text-[10px] text-muted-foreground">{percentage}%</span>
         </div>
         {taskCount.total > 0 && <Progress value={percentage} className="h-1.5" />}
-        <p className="text-[10px] text-muted-foreground">{formatRelativeTime(epic.createdAt)}</p>
       </div>
     </div>
   );
