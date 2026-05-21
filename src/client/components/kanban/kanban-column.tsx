@@ -1,5 +1,6 @@
 'use client';
 
+import { useDroppable } from '@dnd-kit/core';
 import { Archive, Inbox, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -13,10 +14,18 @@ import { TaskCard } from '@/components/kanban/task-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { compareBySortOption } from '@/lib/sort';
+import { EPIC_STATUSES } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import type { Epic, Task } from '@/types';
+
+interface ActiveItem {
+  type: 'task' | 'epic';
+  id: string;
+}
 
 interface KanbanColumnProps {
   label: string;
+  status: string;
   tasks: Task[];
   epics: Epic[];
   allTasks: Task[];
@@ -25,10 +34,12 @@ interface KanbanColumnProps {
   onTaskClick: (task: Task) => void;
   onEpicClick: (epic: Epic) => void;
   onArchiveAll?: () => void;
+  activeItem: ActiveItem | null;
 }
 
 export function KanbanColumn({
   label,
+  status,
   tasks,
   epics,
   allTasks,
@@ -37,8 +48,17 @@ export function KanbanColumn({
   onTaskClick,
   onEpicClick,
   onArchiveAll,
+  activeItem,
 }: KanbanColumnProps) {
   const [filter, setFilter] = useState<ColumnFilterState>(DEFAULT_FILTER);
+
+  const { isOver, setNodeRef } = useDroppable({
+    id: `column-${status}`,
+    data: { status },
+  });
+
+  const isValidDrop =
+    activeItem?.type !== 'epic' || EPIC_STATUSES.includes(status as (typeof EPIC_STATUSES)[number]);
 
   const filteredEpics = useMemo(() => {
     if (filter.type === 'task') return [];
@@ -100,7 +120,14 @@ export function KanbanColumn({
         </div>
       </div>
 
-      <div className="flex-1 min-h-[100px] overflow-y-auto">
+      <div
+        ref={setNodeRef}
+        className={cn(
+          'flex-1 min-h-[100px] overflow-y-auto transition-colors duration-150',
+          isOver && isValidDrop && 'bg-accent/60 ring-2 ring-inset ring-ring/50',
+          isOver && !isValidDrop && 'ring-2 ring-inset ring-destructive/40'
+        )}
+      >
         <div className="flex flex-col gap-3 p-4">
           {filteredEpics.map((epic) => (
             <EpicCard

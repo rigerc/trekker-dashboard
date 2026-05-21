@@ -1,11 +1,14 @@
 'use client';
 
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { ArrowLeftToLine, ArrowRightFromLine, Layers, SquareCheck } from 'lucide-react';
 
 import { PriorityBadge } from '@/components/priority-badge';
 import { SubtaskProgress } from '@/components/subtask-progress';
 import { Badge } from '@/components/ui/badge';
 import { formatRelativeTime } from '@/lib/date';
+import { cn } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface TaskCardProps {
@@ -18,11 +21,28 @@ interface TaskCardProps {
 export function TaskCard({ task, epicName, subtasks, onClick }: TaskCardProps) {
   const completedSubtasks = subtasks.filter((s) => s.status === 'completed').length;
 
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `task-${task.id}`,
+    data: { type: 'task', id: task.id, currentStatus: task.status },
+  });
+
+  let style: React.CSSProperties | undefined;
+  if (transform) {
+    style = { transform: CSS.Translate.toString(transform) };
+  }
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       data-task-id={task.id}
-      className={`p-4 cursor-pointer hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words`}
+      className={cn(
+        'p-4 hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words cursor-grab active:cursor-grabbing',
+        isDragging && 'opacity-0'
+      )}
       onClick={onClick}
+      {...attributes}
+      {...listeners}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">

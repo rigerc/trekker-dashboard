@@ -1,11 +1,14 @@
 'use client';
 
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { Layers } from 'lucide-react';
 
 import { PriorityBadge } from '@/components/priority-badge';
 import { Progress } from '@/components/ui/progress';
 import { FULL_PERCENTAGE } from '@/lib/constants';
 import { formatRelativeTime } from '@/lib/date';
+import { cn } from '@/lib/utils';
 import type { Epic } from '@/types';
 
 interface EpicCardProps {
@@ -20,10 +23,27 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
     percentage = Math.round((taskCount.completed / taskCount.total) * FULL_PERCENTAGE);
   }
 
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `epic-${epic.id}`,
+    data: { type: 'epic', id: epic.id, currentStatus: epic.status },
+  });
+
+  let style: React.CSSProperties | undefined;
+  if (transform) {
+    style = { transform: CSS.Translate.toString(transform) };
+  }
+
   return (
     <div
-      className="p-4 cursor-pointer bg-blue-50 dark:bg-blue-900/60 hover:ring-1 transition-all duration-100 break-words"
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'p-4 cursor-grab active:cursor-grabbing bg-blue-50 dark:bg-blue-900/60 hover:ring-1 transition-all duration-100 break-words',
+        isDragging && 'opacity-0'
+      )}
       onClick={onClick}
+      {...attributes}
+      {...listeners}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
