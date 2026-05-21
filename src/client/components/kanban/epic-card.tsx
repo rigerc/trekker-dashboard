@@ -38,7 +38,7 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        'p-4 cursor-grab active:cursor-grabbing bg-blue-50 dark:bg-blue-900/60 hover:ring-1 transition-all duration-100 break-words',
+        'p-4 cursor-grab active:cursor-grabbing border border-border/80 bg-card hover:bg-accent/50 hover:ring-1 transition-all duration-100 break-words',
         isDragging && 'opacity-0'
       )}
       onClick={onClick}
@@ -53,10 +53,11 @@ export function EpicCard({ epic, taskCount, onClick }: EpicCardProps) {
       </div>
 
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1 font-mono font-medium text-foreground/75">
+        <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-1.5 py-0.5 font-medium text-primary dark:bg-primary/10">
           <Layers className="h-3.5 w-3.5" />
-          {epic.id}
+          Epic
         </span>
+        <span className="font-mono font-medium text-foreground/75">{epic.id}</span>
         <span>{formatRelativeTime(epic.createdAt)}</span>
       </div>
 
