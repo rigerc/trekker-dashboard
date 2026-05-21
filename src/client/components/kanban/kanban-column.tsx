@@ -67,7 +67,7 @@ export function KanbanColumn({
   };
 
   return (
-    <div className="w-[280px] min-w-[280px] max-w-[320px] flex flex-col border rounded-md">
+    <div className="w-[calc(100vw-2rem)] sm:w-[280px] sm:min-w-[280px] sm:max-w-[320px] shrink-0 snap-start flex flex-col border rounded-md">
       <div className="flex items-center justify-between border-b p-2 bg-accent/50">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-sm">{label}</span>

@@ -41,7 +41,7 @@ export function KanbanBoard({
   }
 
   return (
-    <div className="flex gap-4 items-start flex-nowrap min-h-[calc(100vh-180px)]">
+    <div className="flex gap-4 items-start flex-nowrap min-h-[calc(100dvh-180px)] snap-x snap-mandatory overflow-x-auto">
       {STATUS_COLUMNS.map((column) => (
         <KanbanColumn
           key={column.key}

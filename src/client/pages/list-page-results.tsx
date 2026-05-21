@@ -40,12 +40,12 @@ export function ListPageResults({
         <table className="w-full">
           <thead className="sticky top-0 bg-muted/50">
             <tr className="text-left text-sm">
-              <th className="px-4 py-3 font-medium">ID</th>
+              <th className="hidden sm:table-cell px-4 py-3 font-medium">ID</th>
               <th className="px-4 py-3 font-medium">Type</th>
               <th className="px-4 py-3 font-medium">Title</th>
               <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Priority</th>
-              <th className="px-4 py-3 font-medium">Created</th>
+              <th className="hidden sm:table-cell px-4 py-3 font-medium">Priority</th>
+              <th className="hidden md:table-cell px-4 py-3 font-medium">Created</th>
             </tr>
           </thead>
           <tbody>
@@ -55,7 +55,7 @@ export function ListPageResults({
                 className="cursor-pointer border-t transition-colors hover:bg-muted/30"
                 onClick={() => onRowClick(item)}
               >
-                <td className="px-4 py-3 font-mono text-sm text-muted-foreground">{item.id}</td>
+                <td className="hidden sm:table-cell px-4 py-3 font-mono text-sm text-muted-foreground">{item.id}</td>
                 <td className="px-4 py-3">
                   <Badge variant="outline" className={cn(getTypeBadgeClassName(item.type))}>
                     {item.type}
@@ -72,7 +72,7 @@ export function ListPageResults({
                     {STATUS_LABELS[item.status] ?? item.status}
                   </Badge>
                 </td>
-                <td className="px-4 py-3">
+                <td className="hidden sm:table-cell px-4 py-3">
                   <Badge
                     variant="outline"
                     style={{
@@ -83,7 +83,7 @@ export function ListPageResults({
                     P{item.priority} - {PRIORITY_LABELS[item.priority]}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-sm text-muted-foreground">
+                <td className="hidden md:table-cell px-4 py-3 text-sm text-muted-foreground">
                   {formatDate(item.createdAt)}
                 </td>
               </tr>

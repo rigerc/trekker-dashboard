@@ -21,7 +21,7 @@ export function AppHeaderActions({
   onProjectConfigClick,
 }: AppHeaderActionsProps) {
   const projectNameContent = projectName && (
-    <div className="flex items-center gap-1">
+    <div className="hidden sm:flex items-center gap-1">
       <Package className="text-muted-foreground" width={16} />
       <span className="text-sm text-muted-foreground">{projectName}</span>
     </div>
@@ -29,20 +29,20 @@ export function AppHeaderActions({
 
   const projectConfigButton = projectConfig && (
     <Button size="sm" variant="outline" onClick={onProjectConfigClick}>
-      <SlidersHorizontal className="mr-1 h-4 w-4" />
-      Prefixes
+      <SlidersHorizontal className="h-4 w-4" />
+      <span className="hidden sm:inline ml-1">Prefixes</span>
     </Button>
   );
 
   const newButton = onNewClick && (
     <Button size="sm" onClick={onNewClick}>
-      <Plus className="mr-1 h-4 w-4" />
-      New
+      <Plus className="h-4 w-4" />
+      <span className="hidden sm:inline ml-1">New</span>
     </Button>
   );
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-3 sm:gap-6">
       {projectNameContent}
 
       <div className="flex items-center gap-2">

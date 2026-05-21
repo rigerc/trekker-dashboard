@@ -19,22 +19,30 @@ export function AppHeader({ projectName, projectConfig, onNewClick }: AppHeaderP
 
   return (
     <>
-      <header className="flex items-center justify-between border-b px-4 py-2 bg-accent/50">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <GitBranchPlus />
-            <h1 className="text-lg font-bold">trekker</h1>
+      <header className="border-b bg-accent/50">
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-2 md:gap-6">
+            <div className="flex items-center gap-2">
+              <GitBranchPlus />
+              <h1 className="text-lg font-bold">trekker</h1>
+            </div>
+
+            <div className="hidden md:block">
+              <AppNavigation />
+            </div>
           </div>
 
-          <AppNavigation />
+          <AppHeaderActions
+            projectName={projectName}
+            projectConfig={projectConfig}
+            onNewClick={onNewClick}
+            onProjectConfigClick={() => setShowConfigDialog(true)}
+          />
         </div>
 
-        <AppHeaderActions
-          projectName={projectName}
-          projectConfig={projectConfig}
-          onNewClick={onNewClick}
-          onProjectConfigClick={() => setShowConfigDialog(true)}
-        />
+        <div className="flex md:hidden border-t px-4 py-1.5">
+          <AppNavigation />
+        </div>
       </header>
 
       <ProjectConfigDialog
