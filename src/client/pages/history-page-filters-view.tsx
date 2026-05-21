@@ -30,37 +30,41 @@ export function HistoryPageFiltersView({
 }: HistoryPageFiltersViewProps) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <PageFilterSelect
-        allLabel="All Types"
-        options={typeOptions}
-        placeholder="Type"
-        value={typeValue}
-        onValueChange={onTypeChange}
-      />
+      <div className="flex w-full sm:contents gap-2">
+        <PageFilterSelect
+          allLabel="All Types"
+          options={typeOptions}
+          placeholder="Type"
+          value={typeValue}
+          widthClassName="flex-1 sm:w-[140px]"
+          onValueChange={onTypeChange}
+        />
 
-      <PageFilterSelect
-        allLabel="All Actions"
-        options={actionOptions}
-        placeholder="Action"
-        value={actionValue}
-        onValueChange={onActionChange}
-      />
+        <PageFilterSelect
+          allLabel="All Actions"
+          options={actionOptions}
+          placeholder="Action"
+          value={actionValue}
+          widthClassName="flex-1 sm:w-[140px]"
+          onValueChange={onActionChange}
+        />
 
-      <input
-        type="date"
-        className="h-9 rounded-md border bg-background px-3 text-sm"
-        value={sinceValue}
-        onChange={(event) => onSinceChange(event.target.value)}
-        placeholder="Since"
-      />
+        <input
+          type="date"
+          className="flex-1 sm:flex-none h-9 rounded-md border bg-background px-3 text-sm"
+          value={sinceValue}
+          onChange={(event) => onSinceChange(event.target.value)}
+          placeholder="Since"
+        />
 
-      <input
-        type="date"
-        className="h-9 rounded-md border bg-background px-3 text-sm"
-        value={untilValue}
-        onChange={(event) => onUntilChange(event.target.value)}
-        placeholder="Until"
-      />
+        <input
+          type="date"
+          className="flex-1 sm:flex-none h-9 rounded-md border bg-background px-3 text-sm"
+          value={untilValue}
+          onChange={(event) => onUntilChange(event.target.value)}
+          placeholder="Until"
+        />
+      </div>
     </div>
   );
 }

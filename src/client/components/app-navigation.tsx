@@ -8,13 +8,13 @@ import { cn } from '@/lib/utils';
 function getNavLinkClassName(isActive: boolean): string {
   if (isActive) {
     return cn(
-      'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+      'flex items-center gap-1.5 rounded-md px-3 py-2 md:py-1.5 text-sm font-medium transition-colors',
       'bg-background text-foreground shadow-sm'
     );
   }
 
   return cn(
-    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+    'flex items-center gap-1.5 rounded-md px-3 py-2 md:py-1.5 text-sm font-medium transition-colors',
     'text-muted-foreground hover:bg-background/50 hover:text-foreground'
   );
 }

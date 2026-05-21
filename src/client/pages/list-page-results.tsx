@@ -63,7 +63,7 @@ export function ListPageResults({
                       {item.type}
                     </Badge>
                   </td>
-                  <td className="max-w-md truncate px-4 py-3">{item.title}</td>
+                  <td className="max-w-md truncate px-4 py-3 font-medium">{item.title}</td>
                   <td className="px-4 py-3">
                     <Badge
                       style={{
@@ -102,7 +102,7 @@ export function ListPageResults({
                 onClick={() => onRowClick(item)}
               >
                 <div className="flex items-start gap-3 mb-1">
-                  <span className="text-sm font-medium leading-snug flex-1 min-w-0 line-clamp-2">
+                  <span className="text-sm font-semibold leading-snug flex-1 min-w-0 line-clamp-2">
                     {item.title}
                   </span>
                   <Badge
