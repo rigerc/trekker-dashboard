@@ -41,7 +41,7 @@ export function TaskSidebar({
   }
 
   return (
-    <div className="bg-muted/50 rounded-b-md">
+    <div className="bg-muted/30 rounded-b-md">
       <div className="p-5 space-y-6">
         <DetailsSection
           task={task}
@@ -67,7 +67,10 @@ export function TaskSidebar({
           <Button
             variant="ghost"
             size="sm"
-            className={cn('flex-1 rounded-none', activeTab === 'comments' && 'bg-accent')}
+            className={cn(
+              'flex-1 rounded-none border-b-2 border-transparent',
+              activeTab === 'comments' && 'border-foreground'
+            )}
             onClick={() => setActiveTab('comments')}
           >
             <MessageSquare className="h-4 w-4 mr-1.5" />
@@ -76,7 +79,10 @@ export function TaskSidebar({
           <Button
             variant="ghost"
             size="sm"
-            className={cn('flex-1 rounded-none', activeTab === 'history' && 'bg-accent')}
+            className={cn(
+              'flex-1 rounded-none border-b-2 border-transparent',
+              activeTab === 'history' && 'border-foreground'
+            )}
             onClick={() => setActiveTab('history')}
           >
             <History className="h-4 w-4 mr-1.5" />

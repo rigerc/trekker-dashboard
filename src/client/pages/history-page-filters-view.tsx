@@ -51,7 +51,7 @@ export function HistoryPageFiltersView({
 
         <input
           type="date"
-          className="flex-1 sm:flex-none h-9 rounded-md border bg-background px-3 text-sm"
+          className="flex-1 sm:flex-none h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-ring/50"
           value={sinceValue}
           onChange={(event) => onSinceChange(event.target.value)}
           placeholder="Since"
@@ -59,7 +59,7 @@ export function HistoryPageFiltersView({
 
         <input
           type="date"
-          className="flex-1 sm:flex-none h-9 rounded-md border bg-background px-3 text-sm"
+          className="flex-1 sm:flex-none h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-ring/50"
           value={untilValue}
           onChange={(event) => onUntilChange(event.target.value)}
           placeholder="Until"

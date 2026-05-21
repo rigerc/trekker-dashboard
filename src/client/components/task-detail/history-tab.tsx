@@ -1,5 +1,7 @@
 'use client';
 
+import { History } from 'lucide-react';
+
 import { TaskHistoryEventItem } from '@/components/task-detail/history-event-item';
 import { useHistory } from '@/hooks/use-history';
 import { DEFAULT_HISTORY_PAGE_SIZE } from '@/lib/constants';
@@ -17,7 +19,7 @@ export function HistoryTab({ taskId }: HistoryTabProps) {
 
   if (isLoading) {
     return (
-      <div className="p-4">
+      <div className="p-5">
         <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     );
@@ -25,7 +27,7 @@ export function HistoryTab({ taskId }: HistoryTabProps) {
 
   if (error) {
     return (
-      <div className="p-4">
+      <div className="p-5">
         <p className="text-sm text-destructive">Error: {getErrorMessage(error, 'Unknown error')}</p>
       </div>
     );
@@ -33,14 +35,15 @@ export function HistoryTab({ taskId }: HistoryTabProps) {
 
   if (!data?.events.length) {
     return (
-      <div className="p-4">
-        <p className="text-sm text-muted-foreground italic">No history</p>
+      <div className="p-5 flex flex-col items-center justify-center gap-1.5 text-center py-8">
+        <History className="h-5 w-5 opacity-40" />
+        <p className="text-sm text-muted-foreground">No changes yet</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
+    <div className="p-5">
       <h4 className="text-sm font-medium mb-3">History ({data.events.length})</h4>
       <div>
         {data.events.map((event) => (

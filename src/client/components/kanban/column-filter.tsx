@@ -51,7 +51,7 @@ export function ColumnFilter({ value, onChange }: ColumnFilterProps) {
         title="Sort & filter"
       >
         <SlidersHorizontal className="h-4 w-4" />
-        {active && <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-blue-500" />}
+        {active && <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-ring" />}
       </Button>
 
       <NativePopover

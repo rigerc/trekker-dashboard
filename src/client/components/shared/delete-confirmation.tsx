@@ -22,10 +22,10 @@ export function DeleteConfirmation({
       <div className="flex items-center gap-2">
         <span className="text-sm text-destructive">Delete?</span>
         <Button variant="destructive" size="sm" onClick={onConfirm}>
-          Yes
+          Delete
         </Button>
         <Button variant="outline" size="sm" onClick={onCancel}>
-          No
+          Cancel
         </Button>
       </div>
     );

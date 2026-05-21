@@ -27,7 +27,7 @@ export function DetailModalShell({
   onEdit,
   children,
 }: DetailModalShellProps) {
-  let descriptionContent = <p className="text-sm text-muted-foreground italic">No description</p>;
+  let descriptionContent = <p className="text-sm text-muted-foreground">No description</p>;
   if (description) {
     descriptionContent = <MarkdownRenderer content={description} />;
   }

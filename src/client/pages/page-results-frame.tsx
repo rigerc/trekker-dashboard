@@ -1,5 +1,6 @@
 'use client';
 
+import { PackageOpen } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { getErrorMessage } from '@/lib/errors';
@@ -23,8 +24,9 @@ export function PageResultsFrame({
 
   if (isEmpty) {
     frameContent = (
-      <div className="flex h-full items-center justify-center">
-        <span className="text-muted-foreground">{emptyMessage}</span>
+      <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+        <PackageOpen className="h-8 w-8 opacity-40" />
+        <span className="text-sm text-muted-foreground">{emptyMessage}</span>
       </div>
     );
   }

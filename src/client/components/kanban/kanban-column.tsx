@@ -1,6 +1,6 @@
 'use client';
 
-import { Archive, Plus } from 'lucide-react';
+import { Archive, Inbox, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import {
@@ -120,8 +120,9 @@ export function KanbanColumn({
             />
           ))}
           {totalCount === 0 && (
-            <div className="flex items-center justify-center min-h-[80px] text-sm text-muted-foreground italic">
-              No items
+            <div className="flex flex-col items-center justify-center gap-1.5 min-h-[80px] text-center">
+              <Inbox className="h-5 w-5 opacity-40" />
+              <span className="text-sm text-muted-foreground">Nothing here</span>
             </div>
           )}
         </div>
