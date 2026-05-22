@@ -17,6 +17,7 @@ const STATUS_ACCENT: Record<string, string> = {
 
 interface DependencyNodeData {
   task: Task;
+  [key: string]: unknown;
 }
 
 export type DependencyFlowNode = Node<DependencyNodeData, 'dependency'>;
