@@ -22,6 +22,7 @@ import { TaskCard } from '@/components/kanban/task-card';
 import { useDragStatusUpdate } from '@/hooks/use-drag-status-update';
 import { getErrorMessage } from '@/lib/errors';
 import { EPIC_STATUSES } from '@/lib/types';
+import { usePreferences } from '@/stores/preferences';
 import type { Epic, Task } from '@/types';
 
 function noop(): void {
@@ -57,6 +58,7 @@ export function KanbanBoard({
   onEpicClick,
   onArchiveAllCompleted,
 }: KanbanBoardProps) {
+  const { preferences } = usePreferences();
   const [activeItem, setActiveItem] = useState<ActiveItem | null>(null);
   const [quickItem, setQuickItem] = useState<ActiveItem | null>(null);
   const [quickActionError, setQuickActionError] = useState<string | null>(null);
@@ -292,6 +294,7 @@ export function KanbanBoard({
             onEpicLongPress={(epic) => openQuickActions({ type: 'epic', id: epic.id })}
             onArchiveAll={getArchiveHandler(column.key)}
             activeItem={activeItem}
+            cardDensity={preferences.cardDensity}
           />
         ))}
       </div>
@@ -304,6 +307,7 @@ export function KanbanBoard({
               epicName={getEpicName(activeTask.epicId)}
               subtasks={getSubtasks(activeTask.id)}
               onClick={noop}
+              cardDensity={preferences.cardDensity}
             />
           </div>
         )}
@@ -313,6 +317,7 @@ export function KanbanBoard({
               epic={activeEpic}
               taskCount={getTaskCountForEpic(activeEpic.id)}
               onClick={noop}
+              cardDensity={preferences.cardDensity}
             />
           </div>
         )}

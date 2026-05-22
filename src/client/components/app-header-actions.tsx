@@ -30,7 +30,7 @@ export function AppHeaderActions({
   const projectConfigButton = projectConfig && (
     <Button size="sm" variant="outline" onClick={onProjectConfigClick}>
       <SlidersHorizontal className="h-4 w-4" />
-      <span className="hidden sm:inline ml-1">Prefixes</span>
+      <span className="hidden sm:inline ml-1">Settings</span>
     </Button>
   );
 

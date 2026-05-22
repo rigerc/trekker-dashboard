@@ -10,6 +10,7 @@ import { SubtaskProgress } from '@/components/subtask-progress';
 import { Badge } from '@/components/ui/badge';
 import { formatRelativeTime } from '@/lib/date';
 import { cn } from '@/lib/utils';
+import type { CardDensity } from '@/stores/preferences';
 import type { Task } from '@/types';
 
 interface TaskCardProps {
@@ -18,9 +19,47 @@ interface TaskCardProps {
   subtasks: Task[];
   onClick: () => void;
   onLongPress?: () => void;
+  cardDensity?: CardDensity;
 }
 
-export function TaskCard({ task, epicName, subtasks, onClick, onLongPress }: TaskCardProps) {
+const cardPadding: Record<CardDensity, string> = {
+  compact: 'p-2.5',
+  normal: 'p-4',
+  comfortable: 'p-5',
+};
+
+const sectionGap: Record<CardDensity, string> = {
+  compact: 'mt-1.5',
+  normal: 'mt-2',
+  comfortable: 'mt-3',
+};
+
+const sectionGapLarge: Record<CardDensity, string> = {
+  compact: 'mt-2',
+  normal: 'mt-3',
+  comfortable: 'mt-4',
+};
+
+const idTextSize: Record<CardDensity, string> = {
+  compact: 'text-[10px]',
+  normal: 'text-[11px]',
+  comfortable: 'text-[11px]',
+};
+
+const timeTextSize: Record<CardDensity, string> = {
+  compact: 'text-[10px]',
+  normal: 'text-[11px]',
+  comfortable: 'text-xs',
+};
+
+export function TaskCard({
+  task,
+  epicName,
+  subtasks,
+  onClick,
+  onLongPress,
+  cardDensity = 'normal',
+}: TaskCardProps) {
   const completedSubtasks = subtasks.filter((s) => s.status === 'completed').length;
   const hasDependencies = task.dependsOn.length > 0 || task.blocks.length > 0;
 
@@ -55,7 +94,8 @@ export function TaskCard({ task, epicName, subtasks, onClick, onLongPress }: Tas
       style={style}
       data-task-id={task.id}
       className={cn(
-        'p-4 hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words cursor-grab active:cursor-grabbing',
+        cardPadding[cardDensity],
+        'hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words cursor-grab active:cursor-grabbing',
         isDragging && 'opacity-0',
         isPressing && 'ring-2 ring-ring scale-[0.98] transition-all duration-150 delay-150'
       )}
@@ -75,8 +115,18 @@ export function TaskCard({ task, epicName, subtasks, onClick, onLongPress }: Tas
         <PriorityBadge priority={task.priority} />
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1 font-mono font-medium text-foreground/75">
+      <div
+        className={cn(
+          'flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground',
+          sectionGap[cardDensity]
+        )}
+      >
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 font-mono font-medium text-foreground/75',
+            idTextSize[cardDensity]
+          )}
+        >
           <SquareCheck className="h-3.5 w-3.5" />
           {task.id}
         </span>
@@ -86,11 +136,11 @@ export function TaskCard({ task, epicName, subtasks, onClick, onLongPress }: Tas
             <span className="truncate">{epicName}</span>
           </span>
         )}
-        <span>{formatRelativeTime(task.createdAt)}</span>
+        <span className={timeTextSize[cardDensity]}>{formatRelativeTime(task.createdAt)}</span>
       </div>
 
       {hasDependencies && (
-        <div className="mt-3 flex flex-wrap gap-1.5 border-t pt-3">
+        <div className={cn('flex flex-wrap gap-1.5 border-t pt-3', sectionGapLarge[cardDensity])}>
           {task.blocks.map((blockId) => (
             <span
               key={blockId}
@@ -115,13 +165,18 @@ export function TaskCard({ task, epicName, subtasks, onClick, onLongPress }: Tas
       )}
 
       {task.description && (
-        <p className="mt-3 line-clamp-2 text-xs leading-5 text-muted-foreground">
+        <p
+          className={cn(
+            'line-clamp-2 text-xs leading-5 text-muted-foreground',
+            sectionGapLarge[cardDensity]
+          )}
+        >
           {task.description}
         </p>
       )}
 
       {task.tags && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className={cn('flex flex-wrap gap-1.5', sectionGapLarge[cardDensity])}>
           {task.tags.split(',').map((tag) => (
             <Badge key={tag} variant="outline" className="text-[10px] font-normal">
               {tag.trim()}
@@ -131,7 +186,7 @@ export function TaskCard({ task, epicName, subtasks, onClick, onLongPress }: Tas
       )}
 
       {subtasks.length > 0 && (
-        <div className="mt-3">
+        <div className={sectionGapLarge[cardDensity]}>
           <SubtaskProgress completed={completedSubtasks} total={subtasks.length} />
         </div>
       )}

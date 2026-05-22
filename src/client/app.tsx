@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { APP_ROUTES, ROUTE_PAGES } from '@/app-routes';
 import { AppHeader } from '@/components/app-header';
@@ -7,9 +7,11 @@ import { CreateModal } from '@/components/create-modal';
 import { ConnectionIndicator } from '@/components/shared/connection-indicator';
 import { useAppData, useProject } from '@/hooks/use-data';
 import { useUIStore } from '@/stores';
+import { usePreferences } from '@/stores/preferences';
 
 export function App() {
   const location = useLocation();
+  const { preferences } = usePreferences();
   const { tasks, epics, refetch } = useAppData();
   const { data: project } = useProject();
   const {
@@ -20,6 +22,10 @@ export function App() {
     closeCreateModal,
   } = useUIStore();
   const showConnectionIndicator = location.pathname === '/';
+
+  if (location.pathname === '/' && preferences.defaultPage !== '/') {
+    return <Navigate to={preferences.defaultPage} replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

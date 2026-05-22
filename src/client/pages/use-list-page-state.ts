@@ -3,15 +3,16 @@ import { useState } from 'react';
 import { useAppData } from '@/hooks/use-data';
 import { type ListEntityType, type ListFilters, type ListItem, useList } from '@/hooks/use-list';
 import { useTaskDetailActions } from '@/hooks/use-task-detail-actions';
-import { DEFAULT_LIST_PAGE_SIZE } from '@/lib/constants';
+import { usePreferences } from '@/stores/preferences';
 
 export function useListPageState() {
   const { epics, refetch, tasks } = useAppData();
+  const { preferences } = usePreferences();
   const detailActions = useTaskDetailActions(tasks, epics);
   const [filters, setFilters] = useState<ListFilters>({
-    limit: DEFAULT_LIST_PAGE_SIZE,
+    limit: preferences.listPageSize,
     page: 1,
-    sort: 'created:desc',
+    sort: preferences.listDefaultSort,
   });
   const [searchQuery, setSearchQuery] = useState('');
   const { data, error, isLoading } = useList(filters);
@@ -72,7 +73,7 @@ export function useListPageState() {
   );
   let totalPages = 0;
   if (data) {
-    totalPages = Math.ceil(data.total / (filters.limit ?? DEFAULT_LIST_PAGE_SIZE));
+    totalPages = Math.ceil(data.total / (filters.limit ?? preferences.listPageSize));
   }
 
   return {

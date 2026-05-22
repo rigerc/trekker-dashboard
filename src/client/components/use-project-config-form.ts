@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 
 import { useUpdateProjectConfig } from '@/hooks/use-data';
 import { getErrorMessage } from '@/lib/errors';
+import type { CardDensity, DefaultPage, UserPreferences } from '@/stores/preferences';
+import { DEFAULT_PREFERENCES, usePreferences } from '@/stores/preferences';
 import type { ProjectConfig } from '@/types';
 
 interface ProjectConfigDialogStateOptions {
@@ -13,27 +15,28 @@ interface ProjectConfigDialogStateOptions {
   projectConfig?: ProjectConfig;
 }
 
-interface ProjectConfigFormState {
+interface SettingsFormState {
   issuePrefix: string;
   epicPrefix: string;
   commentPrefix: string;
+  cardDensity: CardDensity;
+  defaultPage: DefaultPage;
+  listPageSize: number;
+  listDefaultSort: string;
 }
 
-const EMPTY_FORM: ProjectConfigFormState = {
-  issuePrefix: '',
-  epicPrefix: '',
-  commentPrefix: '',
-};
-
-function getInitialForm(projectConfig?: ProjectConfig): ProjectConfigFormState {
-  if (!projectConfig) {
-    return EMPTY_FORM;
-  }
-
+function getInitialForm(
+  projectConfig?: ProjectConfig,
+  preferences?: UserPreferences
+): SettingsFormState {
   return {
-    issuePrefix: projectConfig.issuePrefix,
-    epicPrefix: projectConfig.epicPrefix,
-    commentPrefix: projectConfig.commentPrefix,
+    issuePrefix: projectConfig?.issuePrefix ?? '',
+    epicPrefix: projectConfig?.epicPrefix ?? '',
+    commentPrefix: projectConfig?.commentPrefix ?? '',
+    cardDensity: preferences?.cardDensity ?? DEFAULT_PREFERENCES.cardDensity,
+    defaultPage: preferences?.defaultPage ?? DEFAULT_PREFERENCES.defaultPage,
+    listPageSize: preferences?.listPageSize ?? DEFAULT_PREFERENCES.listPageSize,
+    listDefaultSort: preferences?.listDefaultSort ?? DEFAULT_PREFERENCES.listDefaultSort,
   };
 }
 
@@ -42,17 +45,27 @@ export function useProjectConfigForm({
   onOpenChange,
   projectConfig,
 }: ProjectConfigDialogStateOptions) {
-  const [form, setForm] = useState<ProjectConfigFormState>(() => getInitialForm(projectConfig));
+  const { preferences, setPreferences } = usePreferences();
+  const [form, setForm] = useState<SettingsFormState>(() =>
+    getInitialForm(projectConfig, preferences)
+  );
   const updateProjectConfig = useUpdateProjectConfig();
 
   useEffect(() => {
-    setForm(getInitialForm(projectConfig));
-  }, [open, projectConfig]);
+    setForm(getInitialForm(projectConfig, preferences));
+  }, [open, projectConfig, preferences]);
 
-  function handleFieldChange(field: keyof ProjectConfigFormState, value: string) {
+  function handleFieldChange(field: keyof SettingsFormState, value: string) {
     setForm((current) => ({
       ...current,
       [field]: value,
+    }));
+  }
+
+  function handleNumberChange(field: 'listPageSize', value: string) {
+    setForm((current) => ({
+      ...current,
+      [field]: Number(value),
     }));
   }
 
@@ -60,17 +73,28 @@ export function useProjectConfigForm({
     event.preventDefault();
 
     try {
-      await updateProjectConfig.mutateAsync(form);
-      toast.success('Project prefixes updated');
+      await updateProjectConfig.mutateAsync({
+        issuePrefix: form.issuePrefix,
+        epicPrefix: form.epicPrefix,
+        commentPrefix: form.commentPrefix,
+      });
+      setPreferences({
+        cardDensity: form.cardDensity,
+        defaultPage: form.defaultPage,
+        listPageSize: form.listPageSize,
+        listDefaultSort: form.listDefaultSort,
+      });
+      toast.success('Settings saved');
       onOpenChange(false);
     } catch (error) {
-      toast.error(getErrorMessage(error, 'Failed to update prefixes'));
+      toast.error(getErrorMessage(error, 'Failed to update settings'));
     }
   }
 
   return {
     form,
     handleFieldChange,
+    handleNumberChange,
     handleSubmit,
     isPending: updateProjectConfig.isPending,
   };

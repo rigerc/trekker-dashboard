@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { compareBySortOption } from '@/lib/sort';
 import { EPIC_STATUSES } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import type { CardDensity } from '@/stores/preferences';
 import type { Epic, Task } from '@/types';
 
 interface ActiveItem {
@@ -37,7 +38,20 @@ interface KanbanColumnProps {
   onEpicLongPress?: (epic: Epic) => void;
   onArchiveAll?: () => void;
   activeItem: ActiveItem | null;
+  cardDensity: CardDensity;
 }
+
+const CARD_LIST_GAP: Record<CardDensity, string> = {
+  compact: 'gap-2',
+  normal: 'gap-3',
+  comfortable: 'gap-4',
+};
+
+const CARD_LIST_PADDING: Record<CardDensity, string> = {
+  compact: 'p-3',
+  normal: 'p-4',
+  comfortable: 'p-5',
+};
 
 function getFilterSummary(filter: ColumnFilterState): string | null {
   if (filter.type === 'epic') return 'Epics only';
@@ -68,6 +82,7 @@ export function KanbanColumn({
   onEpicLongPress,
   onArchiveAll,
   activeItem,
+  cardDensity,
 }: KanbanColumnProps) {
   const [filter, setFilter] = useState<ColumnFilterState>(DEFAULT_FILTER);
 
@@ -156,7 +171,13 @@ export function KanbanColumn({
           isOver && !isValidDrop && 'ring-2 ring-inset ring-destructive/40'
         )}
       >
-        <div className="flex flex-col gap-3 p-4">
+        <div
+          className={cn(
+            'flex flex-col',
+            CARD_LIST_GAP[cardDensity],
+            CARD_LIST_PADDING[cardDensity]
+          )}
+        >
           {filteredEpics.map((epic) => (
             <EpicCard
               key={epic.id}
@@ -164,6 +185,7 @@ export function KanbanColumn({
               taskCount={getTaskCountForEpic(epic.id)}
               onClick={() => onEpicClick(epic)}
               onLongPress={() => onEpicLongPress?.(epic)}
+              cardDensity={cardDensity}
             />
           ))}
           {filteredTasks.map((task) => (
@@ -174,6 +196,7 @@ export function KanbanColumn({
               subtasks={getSubtasks(task.id)}
               onClick={() => onTaskClick(task)}
               onLongPress={() => onTaskLongPress?.(task)}
+              cardDensity={cardDensity}
             />
           ))}
           {totalCount === 0 && (
