@@ -116,6 +116,7 @@ export default tseslint.config(
       '**/drizzle/**',
       '**/site/**',
       '**/bin/**',
+      '**/docs/context/**',
       'eslint.config.mjs',
       'postcss.config.mjs',
     ],
