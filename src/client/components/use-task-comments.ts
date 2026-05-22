@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import { apiFetch } from '@/hooks/api-query';
 import { getErrorMessage } from '@/lib/errors';
 import type { Comment } from '@/types';
 
 const COMMENT_AUTHOR_STORAGE_KEY = 'trekker-comment-author';
 
 async function readComments(taskId: string): Promise<Comment[]> {
-  const response = await fetch(`/api/tasks/${taskId}/comments`);
+  const response = await apiFetch(`/api/tasks/${taskId}/comments`);
   if (!response.ok) {
     throw new Error('Failed to fetch comments');
   }
@@ -69,7 +70,7 @@ export function useTaskComments(taskId: string) {
     try {
       localStorage.setItem(COMMENT_AUTHOR_STORAGE_KEY, author);
 
-      const response = await fetch(`/api/tasks/${taskId}/comments`, {
+      const response = await apiFetch(`/api/tasks/${taskId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ author, content }),
@@ -93,7 +94,7 @@ export function useTaskComments(taskId: string) {
 
   async function deleteComment(commentId: string) {
     try {
-      const response = await fetch(`/api/comments/${commentId}`, {
+      const response = await apiFetch(`/api/comments/${commentId}`, {
         method: 'DELETE',
       });
 

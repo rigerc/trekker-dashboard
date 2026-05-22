@@ -11,6 +11,7 @@ import {
   type CreateFormValues,
   subtaskFormSchema,
 } from '@/components/create-modal/schema';
+import { apiFetch } from '@/hooks/api-query';
 import { getErrorMessage } from '@/lib/errors';
 import type { CreateType } from '@/types';
 
@@ -76,7 +77,7 @@ export function useCreateForm({ type, defaultStatus, onClose, onCreated }: UseCr
   } = form;
 
   const createEpic = async (data: CreateFormValues) => {
-    const response = await fetch('/api/epics', {
+    const response = await apiFetch('/api/epics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(toCreateEpicPayload(data)),
@@ -91,7 +92,7 @@ export function useCreateForm({ type, defaultStatus, onClose, onCreated }: UseCr
   };
 
   const createTask = async (data: CreateFormValues) => {
-    const response = await fetch('/api/tasks', {
+    const response = await apiFetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(toCreateTaskPayload(data)),
@@ -106,7 +107,7 @@ export function useCreateForm({ type, defaultStatus, onClose, onCreated }: UseCr
   };
 
   const createSubtask = async (data: CreateFormValues) => {
-    const response = await fetch('/api/tasks', {
+    const response = await apiFetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(toCreateSubtaskPayload(data)),

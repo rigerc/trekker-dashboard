@@ -1,4 +1,5 @@
 import type { TaskFormData } from '@/components/task-detail/schema';
+import { apiFetch } from '@/hooks/api-query';
 import type { Task } from '@/types';
 
 interface UpdateTaskRequestPayload {
@@ -41,7 +42,7 @@ export function getTaskFormValues(task: Task | null): TaskFormData {
 }
 
 export async function updateTaskRequest(id: string, payload: UpdateTaskRequestPayload) {
-  const response = await fetch(`/api/tasks/${id}`, {
+  const response = await apiFetch(`/api/tasks/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -56,7 +57,7 @@ export async function updateTaskRequest(id: string, payload: UpdateTaskRequestPa
 }
 
 export async function deleteTaskRequest(id: string) {
-  const response = await fetch(`/api/tasks/${id}`, {
+  const response = await apiFetch(`/api/tasks/${id}`, {
     method: 'DELETE',
   });
 

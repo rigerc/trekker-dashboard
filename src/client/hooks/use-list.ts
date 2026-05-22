@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchQuery } from '@/hooks/api-query';
+import { useActiveProjectId } from '@/stores/dashboard-config';
 
 export type ListEntityType = 'epic' | 'task' | 'subtask';
 
@@ -53,8 +54,10 @@ async function fetchList(filters: ListFilters): Promise<ListResponse> {
 }
 
 export function useList(filters: ListFilters) {
+  const activeProjectId = useActiveProjectId();
   return useQuery({
-    queryKey: ['list', filters],
+    queryKey: ['projects', activeProjectId, 'list', filters],
     queryFn: () => fetchList(filters),
+    enabled: Boolean(activeProjectId),
   });
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { getActiveProjectIdSnapshot } from '@/stores/dashboard-config';
+
 type QueryParamScalar = number | string;
 type QueryParamValue = QueryParamScalar | readonly QueryParamScalar[] | undefined;
 
@@ -34,6 +36,21 @@ function buildQueryParams(params: Record<string, QueryParamValue>): URLSearchPar
   return searchParams;
 }
 
+export function getProjectHeaders(projectId = getActiveProjectIdSnapshot()): HeadersInit {
+  if (!projectId) return {};
+  return { 'X-Trekker-Project-Id': projectId };
+}
+
+export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(init.headers);
+  const projectId = getActiveProjectIdSnapshot();
+  if (projectId && !headers.has('X-Trekker-Project-Id')) {
+    headers.set('X-Trekker-Project-Id', projectId);
+  }
+
+  return fetch(path, { ...init, headers });
+}
+
 export async function fetchQuery<T>(
   path: string,
   params: Record<string, QueryParamValue>,
@@ -46,7 +63,7 @@ export async function fetchQuery<T>(
     url = `${path}?${query}`;
   }
 
-  const response = await fetch(url);
+  const response = await apiFetch(url);
   if (!response.ok) {
     const error: ApiErrorResponse = await response.json();
     throw new Error(error.error || fallbackMessage);

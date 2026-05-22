@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { STATUS_LABELS } from '@/lib/constants';
 import { sendNotification } from '@/lib/notifications';
 import { useUIStore } from '@/stores';
+import { useActiveProjectId } from '@/stores/dashboard-config';
 
 interface TaskCreatedEvent {
   type: 'task_created';
@@ -72,6 +73,7 @@ const RETRY_BACKOFF_FACTOR = 2;
 
 export function useTaskEvents(onTaskChange?: () => void) {
   const connectionStatus = useUIStore((state) => state.connectionStatus);
+  const activeProjectId = useActiveProjectId();
 
   const onTaskChangeRef = useRef(onTaskChange);
   onTaskChangeRef.current = onTaskChange;
@@ -86,7 +88,8 @@ export function useTaskEvents(onTaskChange?: () => void) {
     function connect() {
       if (closed) return;
       setStatus('connecting');
-      eventSource = new EventSource('/api/events');
+      if (!activeProjectId) return;
+      eventSource = new EventSource(`/api/events?projectId=${encodeURIComponent(activeProjectId)}`);
 
       eventSource.onopen = () => {
         if (!closed) {
@@ -161,7 +164,7 @@ export function useTaskEvents(onTaskChange?: () => void) {
       eventSource?.close();
       setStatus('disconnected');
     };
-  }, []);
+  }, [activeProjectId]);
 
   return { connectionStatus };
 }

@@ -1,4 +1,5 @@
 import type { EpicFormData } from '@/components/epic-detail/schema';
+import { apiFetch } from '@/hooks/api-query';
 import type { Epic } from '@/types';
 
 interface UpdateEpicRequestPayload {
@@ -35,7 +36,7 @@ export function getEpicFormValues(epic: Epic | null): EpicFormData {
 }
 
 export async function updateEpicRequest(id: string, payload: UpdateEpicRequestPayload) {
-  const response = await fetch(`/api/epics/${id}`, {
+  const response = await apiFetch(`/api/epics/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -50,7 +51,7 @@ export async function updateEpicRequest(id: string, payload: UpdateEpicRequestPa
 }
 
 export async function deleteEpicRequest(id: string) {
-  const response = await fetch(`/api/epics/${id}`, {
+  const response = await apiFetch(`/api/epics/${id}`, {
     method: 'DELETE',
   });
 

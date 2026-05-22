@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { AppHeaderActions } from '@/components/app-header-actions';
 import { AppNavigation } from '@/components/app-navigation';
-import { ProjectConfigDialog } from '@/components/project-config-dialog';
+import { SettingsDialog } from '@/components/settings-dialog';
 import type { ProjectConfig } from '@/types';
 
 interface AppHeaderProps {
@@ -45,7 +45,7 @@ export function AppHeader({ projectName, projectConfig, onNewClick }: AppHeaderP
         </div>
       </header>
 
-      <ProjectConfigDialog
+      <SettingsDialog
         open={showConfigDialog}
         onOpenChange={setShowConfigDialog}
         projectName={projectName}

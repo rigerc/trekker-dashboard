@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchQuery } from '@/hooks/api-query';
+import { useActiveProjectId } from '@/stores/dashboard-config';
 
 export type HistoryEntityType = 'epic' | 'task' | 'subtask' | 'comment' | 'dependency';
 export type HistoryAction = 'create' | 'update' | 'delete';
@@ -51,8 +52,10 @@ async function fetchHistory(filters: HistoryFilters): Promise<HistoryResponse> {
 }
 
 export function useHistory(filters: HistoryFilters) {
+  const activeProjectId = useActiveProjectId();
   return useQuery({
-    queryKey: ['history', filters],
+    queryKey: ['projects', activeProjectId, 'history', filters],
     queryFn: () => fetchHistory(filters),
+    enabled: Boolean(activeProjectId),
   });
 }

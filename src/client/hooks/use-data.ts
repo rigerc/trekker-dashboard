@@ -1,46 +1,65 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { apiFetch } from '@/hooks/api-query';
 import type { ProjectConfig } from '@/lib/types';
+import { useActiveProjectId, useOpenProject } from '@/stores/dashboard-config';
 import type { Epic, Project, Task } from '@/types';
 
 // Fetch functions
 async function fetchTasks(): Promise<Task[]> {
-  const res = await fetch('/api/tasks');
+  const res = await apiFetch('/api/tasks');
   if (!res.ok) throw new Error('Failed to fetch tasks');
   return res.json();
 }
 
 async function fetchEpics(): Promise<Epic[]> {
-  const res = await fetch('/api/epics');
+  const res = await apiFetch('/api/epics');
   if (!res.ok) throw new Error('Failed to fetch epics');
   return res.json();
 }
 
 async function fetchProject(): Promise<Project | null> {
-  const res = await fetch('/api/project');
+  const res = await apiFetch('/api/project');
   if (!res.ok) return null;
   return res.json();
 }
 
 // Query hooks
 function useTasks() {
+  const activeProjectId = useActiveProjectId();
   return useQuery({
-    queryKey: ['tasks'],
+    queryKey: ['projects', activeProjectId, 'tasks'],
     queryFn: fetchTasks,
+    enabled: Boolean(activeProjectId),
   });
 }
 
 function useEpics() {
+  const activeProjectId = useActiveProjectId();
   return useQuery({
-    queryKey: ['epics'],
+    queryKey: ['projects', activeProjectId, 'epics'],
     queryFn: fetchEpics,
+    enabled: Boolean(activeProjectId),
   });
 }
 
 export function useProject() {
+  const activeProjectId = useActiveProjectId();
+  const openProject = useOpenProject();
+  let initialData: Project | undefined;
+  if (openProject) {
+    initialData = {
+      id: openProject.id,
+      name: openProject.name,
+      config: undefined,
+    } as unknown as Project;
+  }
+
   return useQuery({
-    queryKey: ['project'],
+    queryKey: ['projects', activeProjectId, 'project'],
     queryFn: fetchProject,
+    enabled: Boolean(activeProjectId),
+    initialData,
   });
 }
 
@@ -49,7 +68,7 @@ export function useUpdateProjectConfig() {
 
   return useMutation({
     mutationFn: async (data: Partial<ProjectConfig>) => {
-      const res = await fetch('/api/project/config', {
+      const res = await apiFetch('/api/project/config', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -63,7 +82,7 @@ export function useUpdateProjectConfig() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 }
@@ -90,7 +109,7 @@ export function useBulkArchiveCompleted() {
 
   return useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/bulk-archive-completed', {
+      const res = await apiFetch('/api/bulk-archive-completed', {
         method: 'POST',
       });
       if (!res.ok) {
@@ -100,8 +119,7 @@ export function useBulkArchiveCompleted() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['epics'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 }

@@ -5,7 +5,7 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QUERY_STALE_TIME_MS } from '@/lib/constants';
-import { PreferencesProvider } from '@/stores/preferences';
+import { ActiveProjectSnapshot, DashboardConfigProvider } from '@/stores/dashboard-config';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -23,9 +23,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" disableTransitionOnChange>
-        <PreferencesProvider>
+        <DashboardConfigProvider>
+          <ActiveProjectSnapshot />
           <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
-        </PreferencesProvider>
+        </DashboardConfigProvider>
         <Toaster position="bottom-right" richColors />
       </ThemeProvider>
     </QueryClientProvider>

@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { apiFetch } from '@/hooks/api-query';
 import { getErrorMessage } from '@/lib/errors';
 
 interface DependencyPayload {
@@ -15,7 +16,7 @@ interface RemoveDependencyPayload extends DependencyPayload {
 }
 
 async function addDependencyRequest(payload: DependencyPayload) {
-  const response = await fetch('/api/dependencies', {
+  const response = await apiFetch('/api/dependencies', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -31,7 +32,7 @@ async function addDependencyRequest(payload: DependencyPayload) {
 
 async function removeDependencyRequest({ taskId, dependsOnId }: DependencyPayload) {
   const params = new URLSearchParams({ taskId, dependsOnId });
-  const response = await fetch(`/api/dependencies?${params.toString()}`, {
+  const response = await apiFetch(`/api/dependencies?${params.toString()}`, {
     method: 'DELETE',
   });
 
@@ -47,9 +48,7 @@ export function useTaskDependencies() {
   const queryClient = useQueryClient();
 
   function invalidateTaskQueries() {
-    queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    queryClient.invalidateQueries({ queryKey: ['list'] });
-    queryClient.invalidateQueries({ queryKey: ['history'] });
+    queryClient.invalidateQueries({ queryKey: ['projects'] });
   }
 
   const addMutation = useMutation({
