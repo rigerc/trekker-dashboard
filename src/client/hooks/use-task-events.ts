@@ -75,12 +75,14 @@ export function useTaskEvents(onTaskChange?: () => void) {
 
   useEffect(() => {
     const setStatus = useUIStore.getState().setConnectionStatus;
+    let closed = false;
+
     setStatus('connecting');
 
     const eventSource = new EventSource('/api/events');
 
     eventSource.onopen = () => {
-      setStatus('connected');
+      if (!closed) setStatus('connected');
     };
 
     eventSource.onmessage = (event) => {
@@ -88,7 +90,7 @@ export function useTaskEvents(onTaskChange?: () => void) {
         const data: SSEEvent = JSON.parse(event.data);
 
         if (data.type === 'connected') {
-          setStatus('connected');
+          if (!closed) setStatus('connected');
           return;
         }
 
@@ -131,10 +133,11 @@ export function useTaskEvents(onTaskChange?: () => void) {
     };
 
     eventSource.onerror = () => {
-      setStatus('disconnected');
+      if (!closed) setStatus('disconnected');
     };
 
     return () => {
+      closed = true;
       eventSource.close();
       setStatus('disconnected');
     };
