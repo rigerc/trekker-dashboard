@@ -1,4 +1,4 @@
-import { epics, getDb, tasks } from '@server/lib/db';
+import { epics, getCurrentDbPath, getDb, tasks } from '@server/lib/db';
 
 // Note: This is a polling-based SSE implementation with global state.
 // Not suitable for multi-instance deployments.
@@ -25,11 +25,35 @@ type SSEEvent =
   | { type: 'epic_updated'; epicId: string; epicTitle: string; status: string }
   | { type: 'epic_deleted'; epicId: string; epicTitle: string };
 
-const lastTaskState = new Map<string, TaskSnapshot>();
-const lastEpicState = new Map<string, EpicSnapshot>();
+interface EventState {
+  epics: Map<string, EpicSnapshot>;
+  tasks: Map<string, TaskSnapshot>;
+}
+
+const eventStateByDbPath = new Map<string, EventState>();
+
+function getEventState(): EventState {
+  const dbPath = getCurrentDbPath();
+  let state = eventStateByDbPath.get(dbPath);
+  if (!state) {
+    state = { epics: new Map(), tasks: new Map() };
+    eventStateByDbPath.set(dbPath, state);
+  }
+  return state;
+}
+
+export function resetEventState(dbPath?: string): void {
+  if (dbPath) {
+    eventStateByDbPath.delete(dbPath);
+    return;
+  }
+
+  eventStateByDbPath.clear();
+}
 
 export async function initialize(): Promise<void> {
-  if (lastTaskState.size > 0 || lastEpicState.size > 0) {
+  const state = getEventState();
+  if (state.tasks.size > 0 || state.epics.size > 0) {
     return;
   }
 
@@ -41,7 +65,7 @@ export async function initialize(): Promise<void> {
     ]);
 
     for (const task of currentTasks) {
-      lastTaskState.set(task.id, {
+      state.tasks.set(task.id, {
         id: task.id,
         status: task.status,
         title: task.title,
@@ -50,7 +74,7 @@ export async function initialize(): Promise<void> {
     }
 
     for (const epic of currentEpics) {
-      lastEpicState.set(epic.id, {
+      state.epics.set(epic.id, {
         id: epic.id,
         status: epic.status,
         title: epic.title,
@@ -63,6 +87,7 @@ export async function initialize(): Promise<void> {
 }
 
 export async function getChanges(): Promise<SSEEvent[]> {
+  const state = getEventState();
   const db = getDb();
   const [currentTasks, currentEpics] = await Promise.all([
     db.select().from(tasks),
@@ -75,7 +100,7 @@ export async function getChanges(): Promise<SSEEvent[]> {
   const currentTaskIds = new Set<string>();
   for (const task of currentTasks) {
     currentTaskIds.add(task.id);
-    const previous = lastTaskState.get(task.id);
+    const previous = state.tasks.get(task.id);
 
     if (!previous) {
       events.push({
@@ -94,7 +119,7 @@ export async function getChanges(): Promise<SSEEvent[]> {
     }
   }
 
-  for (const [id, task] of lastTaskState) {
+  for (const [id, task] of state.tasks) {
     if (!currentTaskIds.has(id)) {
       events.push({
         type: 'task_deleted',
@@ -108,7 +133,7 @@ export async function getChanges(): Promise<SSEEvent[]> {
   const currentEpicIds = new Set<string>();
   for (const epic of currentEpics) {
     currentEpicIds.add(epic.id);
-    const previous = lastEpicState.get(epic.id);
+    const previous = state.epics.get(epic.id);
 
     if (!previous) {
       events.push({
@@ -127,7 +152,7 @@ export async function getChanges(): Promise<SSEEvent[]> {
     }
   }
 
-  for (const [id, epic] of lastEpicState) {
+  for (const [id, epic] of state.epics) {
     if (!currentEpicIds.has(id)) {
       events.push({
         type: 'epic_deleted',
@@ -138,9 +163,9 @@ export async function getChanges(): Promise<SSEEvent[]> {
   }
 
   // Update state
-  lastTaskState.clear();
+  state.tasks.clear();
   for (const task of currentTasks) {
-    lastTaskState.set(task.id, {
+    state.tasks.set(task.id, {
       id: task.id,
       status: task.status,
       title: task.title,
@@ -148,9 +173,9 @@ export async function getChanges(): Promise<SSEEvent[]> {
     });
   }
 
-  lastEpicState.clear();
+  state.epics.clear();
   for (const epic of currentEpics) {
-    lastEpicState.set(epic.id, {
+    state.epics.set(epic.id, {
       id: epic.id,
       status: epic.status,
       title: epic.title,

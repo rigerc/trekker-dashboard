@@ -1,4 +1,10 @@
-import { AppError } from '@server/errors';
+import {
+  AppError,
+  DatabaseError,
+  DatabaseLockedError,
+  isSqliteError,
+  isSqliteLockedError,
+} from '@server/errors';
 import {
   type AppErrorStatusCode,
   HTTP_STATUS_BAD_REQUEST,
@@ -16,6 +22,23 @@ export function errorHandler(err: Error, c: Context) {
     return c.json(
       { error: 'Validation failed', code: 'VALIDATION_ERROR' },
       HTTP_STATUS_BAD_REQUEST
+    );
+  }
+
+  if (isSqliteLockedError(err)) {
+    const lockedError = new DatabaseLockedError();
+    return c.json(
+      { error: lockedError.message, code: lockedError.code },
+      lockedError.statusCode as AppErrorStatusCode
+    );
+  }
+
+  if (isSqliteError(err)) {
+    const databaseError = new DatabaseError('Database operation failed');
+    console.error('Database error:', err);
+    return c.json(
+      { error: databaseError.message, code: databaseError.code },
+      databaseError.statusCode as AppErrorStatusCode
     );
   }
 

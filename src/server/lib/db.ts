@@ -37,6 +37,12 @@ export type Dependency = typeof dependencies.$inferSelect;
 const dbPathStorage = new AsyncLocalStorage<string>();
 const sqliteInstances = new Map<string, Database>();
 const drizzleInstances = new Map<string, ReturnType<typeof drizzle<typeof schema>>>();
+const SQLITE_BUSY_TIMEOUT_MS = 5000;
+
+function configureSqlite(sqlite: Database): void {
+  sqlite.run(`PRAGMA busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS}`);
+  sqlite.run('PRAGMA journal_mode = WAL');
+}
 
 function seedProjectConfig(sqlite: Database): void {
   for (const [key, value] of Object.entries(PROJECT_CONFIG_DEFAULTS)) {
@@ -64,6 +70,10 @@ function getResolvedDbPath(): string {
   return dbPath;
 }
 
+export function getCurrentDbPath(): string {
+  return getResolvedDbPath();
+}
+
 export function runWithDbPath<T>(dbPath: string, callback: () => T): T {
   return dbPathStorage.run(dbPath, callback);
 }
@@ -75,7 +85,11 @@ export function getDb() {
     return existingDb;
   }
 
-  const sqliteInstance = new Database(dbPath);
+  const sqliteInstance = new Database(dbPath, {
+    create: false,
+    readwrite: true,
+  });
+  configureSqlite(sqliteInstance);
   migrateProjectConfigTable(sqliteInstance);
   const db = drizzle(sqliteInstance, { schema });
   sqliteInstances.set(dbPath, sqliteInstance);

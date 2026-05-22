@@ -5,9 +5,8 @@ import { join } from 'node:path';
 
 import { createApp } from '@server/index';
 import { resetDb, runWithDbPath } from '@server/lib/db';
+import { resetEventState } from '@server/services/event.service';
 import { expect } from 'bun:test';
-
-const TREKKER_CLI_PATH = join(import.meta.dir, '../../../trekker/src/index.ts');
 
 export const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -166,18 +165,20 @@ export interface ApiTestContext {
   createDependency: (input: CreateDependencyInput) => Promise<DependencyResponse>;
   createEpic: (input: CreateEpicInput) => Promise<EpicResponse>;
   createTask: (input: CreateTaskInput) => Promise<TaskResponse>;
+  request: (path: string, init?: RequestInit) => Promise<Response>;
   requestJson: <T>(path: string, init?: RequestInit) => Promise<RequestResult<T>>;
 }
 
 function createTempProject(initArgs: string[] = []): string {
   const cwd = mkdtempSync(join(tmpdir(), 'trekker-dashboard-test-'));
-  const result = spawnSync('bun', ['run', TREKKER_CLI_PATH, 'init', ...initArgs], {
+  const result = spawnSync('trekker', ['init', ...initArgs], {
     cwd,
     encoding: 'utf-8',
     env: { ...process.env, NO_COLOR: '1' },
   });
 
   if ((result.status ?? 1) !== 0) {
+    rmSync(cwd, { recursive: true, force: true });
     throw new Error(result.stderr || result.stdout || 'Failed to initialize Trekker project');
   }
 
@@ -197,8 +198,12 @@ export function createApiTestContext(
   const app = createApp();
   cleanupDirs.push(cwd);
 
+  async function request(path: string, init?: RequestInit): Promise<Response> {
+    return runWithDbPath(dbPath, () => app.request(path, init));
+  }
+
   async function requestJson<T>(path: string, init?: RequestInit): Promise<RequestResult<T>> {
-    const response = await runWithDbPath(dbPath, () => app.request(path, init));
+    const response = await request(path, init);
     return {
       status: response.status,
       body: (await response.json()) as T,
@@ -259,12 +264,14 @@ export function createApiTestContext(
     createDependency,
     createEpic,
     createTask,
+    request,
     requestJson,
   };
 }
 
 export function cleanupApiTestContexts(cleanupDirs: string[]): void {
   resetDb();
+  resetEventState();
   delete process.env.TREKKER_DB_PATH;
 
   while (cleanupDirs.length > 0) {

@@ -152,17 +152,19 @@ export function CreateForm({ form, type, epics, parentTasks }: CreateFormProps) 
             </div>
           )}
 
-          <div className="flex items-center justify-between py-2.5">
-            <span className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Tag className="h-3.5 w-3.5" />
-              Tags
-            </span>
-            <Input
-              {...register('tags')}
-              placeholder="bug, frontend..."
-              className="w-48 h-9 border-none shadow-none bg-transparent px-2.5 text-sm text-right placeholder:text-muted-foreground/40 focus-visible:ring-0"
-            />
-          </div>
+          {type !== 'epic' && (
+            <div className="flex items-center justify-between py-2.5">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Tag className="h-3.5 w-3.5" />
+                Tags
+              </span>
+              <Input
+                {...register('tags')}
+                placeholder="bug, frontend..."
+                className="w-48 h-9 border-none shadow-none bg-transparent px-2.5 text-sm text-right placeholder:text-muted-foreground/40 focus-visible:ring-0"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
