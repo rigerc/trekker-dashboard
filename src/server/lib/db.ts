@@ -41,7 +41,18 @@ const SQLITE_BUSY_TIMEOUT_MS = 5000;
 
 function configureSqlite(sqlite: Database): void {
   sqlite.run(`PRAGMA busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS}`);
-  sqlite.run('PRAGMA journal_mode = WAL');
+  sqlite.run('PRAGMA synchronous = NORMAL');
+  sqlite.run('PRAGMA wal_autocheckpoint = 100');
+  const result = sqlite.query<{ journal_mode: string }, []>('PRAGMA journal_mode = WAL').get();
+  if (result?.journal_mode !== 'wal') {
+    console.warn(
+      `[trekker-dashboard] WAL mode could not be enabled ` +
+        `(current mode: ${result?.journal_mode ?? 'unknown'}). ` +
+        `The trekker CLI may be holding the database open. ` +
+        `Close the CLI and restart the dashboard to enable WAL mode, ` +
+        `or locking errors may occur during concurrent use.`
+    );
+  }
 }
 
 function seedProjectConfig(sqlite: Database): void {
