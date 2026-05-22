@@ -1,6 +1,6 @@
 'use client';
 
-import { GitBranch, Search } from 'lucide-react';
+import { GitBranch, List, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { useAppData } from '@/hooks/use-data';
 import { useTaskDetailActions } from '@/hooks/use-task-detail-actions';
 import { cn } from '@/lib/utils';
 import { DependencyGraphRow } from '@/pages/dependency-graph-components';
+import { DependencyFlowView } from '@/pages/dependency-graph-flow';
 import { EntityDetailModals } from '@/pages/entity-detail-modals';
 import type { Task } from '@/types';
 
@@ -56,6 +57,7 @@ export function DependencyGraphPage() {
   const { epics, error, isLoading, refetch, tasks } = useAppData();
   const detailActions = useTaskDetailActions(tasks, epics);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'graph'>('list');
 
   const edges = useMemo(() => getDependencyEdges(tasks), [tasks]);
   const graphTasks = useMemo(
@@ -83,18 +85,27 @@ export function DependencyGraphPage() {
 
   let content;
   if (graphTasks.length > 0) {
-    content = (
-      <div className="space-y-3 p-3">
-        {graphTasks.map((task) => (
-          <DependencyGraphRow
-            key={task.id}
-            task={task}
-            allTasks={tasks}
-            onTaskClick={(nextTask) => detailActions.openTaskDetail(nextTask.id)}
-          />
-        ))}
-      </div>
-    );
+    if (viewMode === 'graph') {
+      content = (
+        <DependencyFlowView
+          tasks={graphTasks}
+          onTaskClick={(task) => detailActions.openTaskDetail(task.id)}
+        />
+      );
+    } else {
+      content = (
+        <div className="space-y-3 p-3">
+          {graphTasks.map((task) => (
+            <DependencyGraphRow
+              key={task.id}
+              task={task}
+              allTasks={tasks}
+              onTaskClick={(nextTask) => detailActions.openTaskDetail(nextTask.id)}
+            />
+          ))}
+        </div>
+      );
+    }
   } else {
     content = (
       <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
@@ -105,6 +116,27 @@ export function DependencyGraphPage() {
         </span>
       </div>
     );
+  }
+
+  let listButtonClass: string;
+  if (viewMode === 'list') {
+    listButtonClass = 'bg-accent text-accent-foreground';
+  } else {
+    listButtonClass = 'text-muted-foreground hover:text-foreground';
+  }
+
+  let graphButtonClass: string;
+  if (viewMode === 'graph') {
+    graphButtonClass = 'bg-accent text-accent-foreground';
+  } else {
+    graphButtonClass = 'text-muted-foreground hover:text-foreground';
+  }
+
+  let containerOverflow: string;
+  if (viewMode === 'graph') {
+    containerOverflow = 'overflow-hidden relative';
+  } else {
+    containerOverflow = 'overflow-auto';
   }
 
   return (
@@ -121,14 +153,35 @@ export function DependencyGraphPage() {
             </p>
           </div>
 
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search graph..."
-              className="pl-9"
-            />
+          <div className="flex items-end gap-3">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search graph..."
+                className="pl-9"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 rounded-lg border p-0.5">
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={cn('rounded-md p-1.5 transition-colors', listButtonClass)}
+                title="List view"
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('graph')}
+                className={cn('rounded-md p-1.5 transition-colors', graphButtonClass)}
+                title="Graph view"
+              >
+                <GitBranch className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -155,7 +208,8 @@ export function DependencyGraphPage() {
 
         <div
           className={cn(
-            'flex-1 overflow-auto rounded-lg border',
+            'flex-1 rounded-lg border',
+            containerOverflow,
             graphTasks.length === 0 && 'min-h-[280px]'
           )}
         >
