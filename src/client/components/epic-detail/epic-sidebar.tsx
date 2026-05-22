@@ -1,16 +1,9 @@
 'use client';
 
-import {
-  Metadata,
-  PrioritySelect,
-  SectionHeader,
-  StatusIcon,
-  StatusSelect,
-} from '@/components/shared';
-import { Button } from '@/components/ui/button';
+import { EpicTaskRow } from '@/components/epic-detail/epic-task-row';
+import { Metadata, PrioritySelect, SectionHeader, StatusSelect } from '@/components/shared';
 import { EPIC_STATUSES } from '@/lib/constants';
 import { isTerminalStatus } from '@/lib/status';
-import { cn } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface EpicSidebarProps {
@@ -73,30 +66,9 @@ export function EpicSidebar({
               Tasks
             </SectionHeader>
             <div className="space-y-1">
-              {epicTasks.map((task) => {
-                const isDone = isTerminalStatus(task.status);
-                return (
-                  <Button
-                    key={task.id}
-                    variant="ghost"
-                    className="w-full justify-start h-auto p-1.5 gap-2 whitespace-normal"
-                    onClick={() => onTaskClick?.(task)}
-                  >
-                    <StatusIcon status={task.status} />
-                    <span className="font-mono text-xs text-muted-foreground shrink-0">
-                      {task.id}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-sm flex-1 text-left wrap-break-words',
-                        isDone && 'line-through text-muted-foreground'
-                      )}
-                    >
-                      {task.title}
-                    </span>
-                  </Button>
-                );
-              })}
+              {epicTasks.map((task) => (
+                <EpicTaskRow key={task.id} task={task} onTaskClick={onTaskClick} />
+              ))}
             </div>
           </div>
         )}
