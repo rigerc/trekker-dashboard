@@ -147,26 +147,34 @@ export async function update(id: string, input: UpdateTaskInput): Promise<TaskWi
   return getById(id);
 }
 
+async function collectSubtreeIds(id: string): Promise<string[]> {
+  const db = getDb();
+  const subtasks = await db.select({ id: tasks.id }).from(tasks).where(eq(tasks.parentTaskId, id));
+  const ids: string[] = [];
+  for (const subtask of subtasks) {
+    ids.push(...(await collectSubtreeIds(subtask.id)));
+  }
+  ids.push(id);
+  return ids;
+}
+
 export async function remove(id: string): Promise<void> {
   const db = getDb();
 
-  // Verify task exists
   await getById(id);
 
-  // Cascade: delete comments
-  await db.delete(comments).where(eq(comments.taskId, id));
+  // Collect all IDs in the subtree (leaves first, root last)
+  const allIds = await collectSubtreeIds(id);
 
-  // Cascade: delete dependencies (both directions)
-  await db
-    .delete(dependencies)
-    .where(or(eq(dependencies.taskId, id), eq(dependencies.dependsOnId, id)));
-
-  // Cascade: delete subtasks
-  const subtasks = await db.select().from(tasks).where(eq(tasks.parentTaskId, id));
-  for (const subtask of subtasks) {
-    await remove(subtask.id);
-  }
-
-  // Delete the task
-  await db.delete(tasks).where(eq(tasks.id, id));
+  await db.transaction(async (tx) => {
+    for (const taskId of allIds) {
+      await tx.delete(comments).where(eq(comments.taskId, taskId));
+      await tx
+        .delete(dependencies)
+        .where(or(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, taskId)));
+    }
+    for (const taskId of allIds) {
+      await tx.delete(tasks).where(eq(tasks.id, taskId));
+    }
+  });
 }

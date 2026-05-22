@@ -9,16 +9,18 @@ interface CreateDependencyInput {
   dependsOnId: string;
 }
 
-async function assertTaskExists(taskId: string, label: string): Promise<void> {
-  const db = getDb();
+type DbOrTx =
+  | ReturnType<typeof getDb>
+  | Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0];
+
+async function assertTaskExists(db: DbOrTx, taskId: string, label: string): Promise<void> {
   const result = await db.select().from(tasks).where(eq(tasks.id, taskId));
   if (!result[0]) {
     throw new NotFoundError(label, taskId);
   }
 }
 
-async function wouldCreateCycle(taskId: string, dependsOnId: string): Promise<boolean> {
-  const db = getDb();
+async function wouldCreateCycle(db: DbOrTx, taskId: string, dependsOnId: string): Promise<boolean> {
   const visited = new Set<string>();
   const stack = [dependsOnId];
 
@@ -57,44 +59,39 @@ export async function create(input: CreateDependencyInput): Promise<Dependency> 
   const db = getDb();
   const { taskId, dependsOnId } = input;
 
-  // Validate task can't depend on itself
   if (taskId === dependsOnId) {
     throw new ValidationError('A task cannot depend on itself');
   }
 
-  // Validate both tasks exist
-  await assertTaskExists(taskId, 'Task');
-  await assertTaskExists(dependsOnId, 'Dependency task');
+  return await db.transaction(async (tx) => {
+    await assertTaskExists(tx, taskId, 'Task');
+    await assertTaskExists(tx, dependsOnId, 'Dependency task');
 
-  // Validate dependency doesn't already exist
-  const existingDep = await db
-    .select()
-    .from(dependencies)
-    .where(and(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, dependsOnId)));
+    const existingDep = await tx
+      .select()
+      .from(dependencies)
+      .where(and(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, dependsOnId)));
 
-  if (existingDep[0]) {
-    throw new ConflictError('Dependency already exists');
-  }
+    if (existingDep[0]) {
+      throw new ConflictError('Dependency already exists');
+    }
 
-  // Validate adding this dependency won't create a cycle
-  const wouldCycle = await wouldCreateCycle(taskId, dependsOnId);
-  if (wouldCycle) {
-    throw new ValidationError('Adding this dependency would create a cycle');
-  }
+    const wouldCycle = await wouldCreateCycle(tx, taskId, dependsOnId);
+    if (wouldCycle) {
+      throw new ValidationError('Adding this dependency would create a cycle');
+    }
 
-  const id = generateUuid();
-  const now = new Date();
+    const dependency = {
+      id: generateUuid(),
+      taskId,
+      dependsOnId,
+      createdAt: new Date(),
+    };
 
-  const dependency = {
-    id,
-    taskId,
-    dependsOnId,
-    createdAt: now,
-  };
+    await tx.insert(dependencies).values(dependency);
 
-  await db.insert(dependencies).values(dependency);
-
-  return dependency;
+    return dependency;
+  });
 }
 
 export async function remove(taskId: string, dependsOnId: string): Promise<void> {
