@@ -41,7 +41,10 @@ export function validateTrekkerDb(dbPath: string): void {
   const sqlite = new Database(dbPath);
   try {
     const row = sqlite
-      .query<{ name: string }, []>("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'projects'")
+      .query<
+        { name: string },
+        []
+      >("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'projects'")
       .get();
     if (!row) {
       throw new Error(`Not a Trekker database: ${dbPath}`);
@@ -57,7 +60,11 @@ export async function listRegisteredProjects(): Promise<DashboardProject[]> {
 
 export async function getOpenProject(): Promise<DashboardProject | null> {
   const config = await readDashboardConfig();
-  return config.projects.find((project) => project.id === config.openProjectId) ?? config.projects[0] ?? null;
+  return (
+    config.projects.find((project) => project.id === config.openProjectId) ??
+    config.projects[0] ??
+    null
+  );
 }
 
 export async function getProjectById(id: string): Promise<DashboardProject | null> {

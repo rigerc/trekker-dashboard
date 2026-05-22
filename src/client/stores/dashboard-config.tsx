@@ -148,6 +148,13 @@ export function usePreferences() {
 export function useProjects() {
   const queryClient = useQueryClient();
   const context = useDashboardConfig();
+  const syncDashboardConfig = useCallback(
+    (data: DashboardConfig) => {
+      queryClient.setQueryData(['dashboard-config'], data);
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-config'] });
+    },
+    [queryClient]
+  );
   const openMutation = useMutation({
     mutationFn: async (projectId: string) => {
       const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/open`, {
@@ -156,8 +163,10 @@ export function useProjects() {
       return parseJsonResponse<DashboardConfig>(response, 'Failed to open project');
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(['dashboard-config'], data);
-      queryClient.invalidateQueries();
+      syncDashboardConfig(data);
+      void queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] !== 'dashboard-config',
+      });
     },
   });
   const addMutation = useMutation({
@@ -169,7 +178,7 @@ export function useProjects() {
       });
       return parseJsonResponse<DashboardConfig>(response, 'Failed to add project');
     },
-    onSuccess: (data) => queryClient.setQueryData(['dashboard-config'], data),
+    onSuccess: syncDashboardConfig,
   });
   const removeMutation = useMutation({
     mutationFn: async (projectId: string) => {
@@ -178,14 +187,21 @@ export function useProjects() {
       });
       return parseJsonResponse<DashboardConfig>(response, 'Failed to remove project');
     },
-    onSuccess: (data) => queryClient.setQueryData(['dashboard-config'], data),
+    onSuccess: syncDashboardConfig,
   });
 
   return {
     ...context,
-    openProject: openMutation.mutate,
-    addProject: addMutation.mutate,
-    removeProject: removeMutation.mutate,
+    openProject: openMutation.mutateAsync,
+    addProject: addMutation.mutateAsync,
+    removeProject: removeMutation.mutateAsync,
+    openingProjectId: openMutation.variables,
+    addingProjectInput: addMutation.variables,
+    removingProjectId: removeMutation.variables,
+    isOpeningProject: openMutation.isPending,
+    isAddingProject: addMutation.isPending,
+    isRemovingProject: removeMutation.isPending,
+    projectMutationError: openMutation.error ?? addMutation.error ?? removeMutation.error,
   };
 }
 

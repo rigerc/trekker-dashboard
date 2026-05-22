@@ -1,4 +1,7 @@
-import { patchDashboardConfig, readDashboardConfig } from '@server/services/dashboard-config.service';
+import {
+  patchDashboardConfig,
+  readDashboardConfig,
+} from '@server/services/dashboard-config.service';
 import { Hono } from 'hono';
 
 const app = new Hono();

@@ -1,7 +1,10 @@
 import { readdir } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 
-import { listRegisteredProjects, validateTrekkerDb } from '@server/services/project-registry.service';
+import {
+  listRegisteredProjects,
+  validateTrekkerDb,
+} from '@server/services/project-registry.service';
 
 const IGNORED_DIRS = new Set([
   '.cache',
@@ -47,9 +50,14 @@ function suggestionName(dbPath: string): string {
   return basename(dirname(dirname(dbPath))) || dbPath;
 }
 
-export async function discoverProjects(root: string, limit = DEFAULT_SCAN_LIMIT): Promise<ProjectDiscoveryResult> {
+export async function discoverProjects(
+  root: string,
+  limit = DEFAULT_SCAN_LIMIT
+): Promise<ProjectDiscoveryResult> {
   const start = resolve(root || process.cwd());
-  const registeredPaths = new Set((await listRegisteredProjects()).map((project) => project.dbPath));
+  const registeredPaths = new Set(
+    (await listRegisteredProjects()).map((project) => project.dbPath)
+  );
   const suggestions: ProjectSuggestion[] = [];
   let scanned = 0;
   let limitReached = false;

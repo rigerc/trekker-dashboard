@@ -1,3 +1,4 @@
+import { readDashboardConfig } from '@server/services/dashboard-config.service';
 import { discoverProjects } from '@server/services/project-discovery.service';
 import {
   addProject,
@@ -29,15 +30,18 @@ app.get('/discovered', handleDiscoverProjects);
 
 app.post('/', async (c) => {
   const body = await c.req.json();
-  const project = await addProject({ dbPath: body.dbPath ?? body.path, name: body.name, open: body.open });
-  return c.json(project, 201);
+  await addProject({ dbPath: body.dbPath ?? body.path, name: body.name, open: body.open });
+  return c.json(await readDashboardConfig(), 201);
 });
 
 app.delete('/:id', async (c) => {
   await removeProject(c.req.param('id'));
-  return c.json({ ok: true });
+  return c.json(await readDashboardConfig());
 });
 
-app.patch('/:id/open', async (c) => c.json(await openProject(c.req.param('id'))));
+app.patch('/:id/open', async (c) => {
+  await openProject(c.req.param('id'));
+  return c.json(await readDashboardConfig());
+});
 
 export default app;
