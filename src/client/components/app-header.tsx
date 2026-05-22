@@ -23,8 +23,8 @@ export function AppHeader({ projectName, projectConfig, onNewClick }: AppHeaderP
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2 md:gap-6">
             <div className="flex items-center gap-2">
-              <GitBranchPlus />
-              <h1 className="text-lg font-bold">trekker</h1>
+              <GitBranchPlus className="h-5 w-5" />
+              <h1 className="text-xl font-bold">trekker</h1>
             </div>
 
             <div className="hidden md:block">
@@ -32,12 +32,13 @@ export function AppHeader({ projectName, projectConfig, onNewClick }: AppHeaderP
             </div>
           </div>
 
-          <AppHeaderActions
-            projectName={projectName}
-            projectConfig={projectConfig}
-            onNewClick={onNewClick}
-            onProjectConfigClick={() => setShowConfigDialog(true)}
-          />
+          <div className="flex items-center gap-2 border-l pl-4">
+            <AppHeaderActions
+              projectName={projectName}
+              onNewClick={onNewClick}
+              onProjectConfigClick={() => setShowConfigDialog(true)}
+            />
+          </div>
         </div>
 
         <div className="flex md:hidden border-t px-4 py-2">

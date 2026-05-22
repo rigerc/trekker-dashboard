@@ -302,7 +302,7 @@ export function KanbanBoard({
 
       <DragOverlay dropAnimation={null}>
         {activeTask && (
-          <div className="opacity-95 rotate-1 scale-[1.02] shadow-xl pointer-events-none">
+          <div className="opacity-95 scale-[1.02] shadow-xl pointer-events-none">
             <TaskCard
               task={activeTask}
               epicName={getEpicName(activeTask.epicId)}
@@ -313,7 +313,7 @@ export function KanbanBoard({
           </div>
         )}
         {activeEpic && (
-          <div className="opacity-95 rotate-1 scale-[1.02] shadow-xl pointer-events-none">
+          <div className="opacity-95 scale-[1.02] shadow-xl pointer-events-none">
             <EpicCard
               epic={activeEpic}
               taskCount={getTaskCountForEpic(activeEpic.id)}

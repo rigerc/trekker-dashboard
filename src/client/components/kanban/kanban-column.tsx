@@ -61,12 +61,16 @@ function getFilterSummary(filter: ColumnFilterState): string | null {
   return null;
 }
 
-function getEmptyMessage(status: string): string {
-  if (status === 'todo') return 'No queued work';
-  if (status === 'in_progress') return 'No active work';
-  if (status === 'completed') return 'Drop finished work here';
-  if (status === 'wont_fix') return 'No rejected work';
-  return 'No work here';
+function getEmptyMessage(status: string): { primary: string; secondary?: string } {
+  if (status === 'todo')
+    return { primary: 'No tasks queued', secondary: 'Click + to add your first task' };
+  if (status === 'in_progress')
+    return { primary: 'No active work', secondary: 'Drag tasks here to start working' };
+  if (status === 'completed')
+    return { primary: 'No completed tasks yet', secondary: 'Great work incoming!' };
+  if (status === 'wont_fix')
+    return { primary: 'No rejected work', secondary: 'Drag unwanted tasks here' };
+  return { primary: 'No items' };
 }
 
 export function KanbanColumn({
@@ -220,9 +224,14 @@ export function KanbanColumn({
             />
           ))}
           {totalCount === 0 && (
-            <div className="flex flex-col items-center justify-center gap-1.5 min-h-[80px] text-center">
-              <Inbox className="h-5 w-5 opacity-40" />
-              <span className="text-sm text-muted-foreground">{emptyMessage}</span>
+            <div className="flex flex-col items-center justify-center gap-2 min-h-[120px] text-center px-4">
+              <Inbox className="h-8 w-8 opacity-40" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">{emptyMessage.primary}</p>
+                {emptyMessage.secondary && (
+                  <p className="text-xs text-muted-foreground/70">{emptyMessage.secondary}</p>
+                )}
+              </div>
             </div>
           )}
         </div>

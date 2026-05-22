@@ -25,9 +25,9 @@ interface EpicCardProps {
 }
 
 const cardPadding: Record<CardDensity, string> = {
-  compact: 'p-2.5',
-  normal: 'p-4',
-  comfortable: 'p-5',
+  compact: 'p-3.5',
+  normal: 'p-5',
+  comfortable: 'p-6',
 };
 
 const sectionGap: Record<CardDensity, string> = {
@@ -43,15 +43,15 @@ const sectionGapLarge: Record<CardDensity, string> = {
 };
 
 const idTextSize: Record<CardDensity, string> = {
-  compact: 'text-[10px]',
-  normal: 'text-[11px]',
-  comfortable: 'text-[11px]',
+  compact: 'text-xs',
+  normal: 'text-xs',
+  comfortable: 'text-xs',
 };
 
 const timeTextSize: Record<CardDensity, string> = {
-  compact: 'text-[10px]',
-  normal: 'text-[11px]',
-  comfortable: 'text-xs',
+  compact: 'text-xs',
+  normal: 'text-xs',
+  comfortable: 'text-sm',
 };
 
 export function EpicCard({
@@ -122,7 +122,7 @@ export function EpicCard({
       onPointerUp={longPress.onPointerUp}
     >
       <div className="flex items-start justify-between gap-3">
-        <h4 className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground">
+        <h4 className="min-w-0 flex-1 text-base font-semibold leading-6 text-foreground">
           {epic.title}
         </h4>
         <PriorityBadge priority={epic.priority} />
@@ -130,7 +130,7 @@ export function EpicCard({
 
       <div
         className={cn(
-          'flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground',
+          'flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground',
           sectionGap[cardDensity]
         )}
       >
@@ -138,18 +138,18 @@ export function EpicCard({
           <Layers className="h-3.5 w-3.5" />
           Epic
         </span>
-        <span className={cn('font-mono font-medium text-foreground/75', idTextSize[cardDensity])}>
+        <span className={cn('font-semibold text-foreground/75', idTextSize[cardDensity])}>
           {epic.id}
         </span>
         <span className={timeTextSize[cardDensity]}>{formatRelativeTime(epic.createdAt)}</span>
       </div>
 
       <div className={cn('border-t pt-3', sectionGapLarge[cardDensity])}>
-        <div className="mb-2 flex items-center justify-between text-xs">
+        <div className="mb-2 flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
             {taskCount.completed}/{taskCount.total} tasks
           </span>
-          <span className="font-mono text-[10px] text-muted-foreground">{percentage}%</span>
+          <span className="font-medium text-xs text-muted-foreground">{percentage}%</span>
         </div>
         {taskCount.total > 0 && <Progress value={percentage} className="h-1.5" />}
       </div>
@@ -162,21 +162,19 @@ export function EpicCard({
               <button
                 key={task.id}
                 type="button"
-                className="flex w-full items-center gap-2 rounded-sm px-1 py-0.5 text-left text-xs text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground"
+                className="flex w-full items-center gap-2 rounded-sm px-1 py-0.5 text-left text-sm text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground"
                 onClick={(event) => handleChildClick(event, task)}
               >
                 <SquareCheck className="h-3 w-3 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{task.title}</span>
                 {subtaskCount > 0 && (
-                  <span className="shrink-0 font-mono text-[10px]">{subtaskCount}</span>
+                  <span className="shrink-0 font-medium text-xs">{subtaskCount}</span>
                 )}
               </button>
             );
           })}
           {hiddenChildCount > 0 && (
-            <div className="px-1 text-[11px] text-muted-foreground">
-              +{hiddenChildCount} more tasks
-            </div>
+            <div className="px-1 text-xs text-muted-foreground">+{hiddenChildCount} more tasks</div>
           )}
         </div>
       )}

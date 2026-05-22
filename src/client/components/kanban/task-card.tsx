@@ -13,6 +13,21 @@ import { cn } from '@/lib/utils';
 import type { CardDensity } from '@/stores/preferences';
 import type { Task } from '@/types';
 
+function getPriorityBorderColor(priority: number): string {
+  switch (priority) {
+    case 0:
+      return 'border-l-red-500';
+    case 1:
+      return 'border-l-orange-500';
+    case 2:
+      return 'border-l-yellow-500';
+    case 3:
+      return 'border-l-gray-400';
+    default:
+      return 'border-l-gray-300';
+  }
+}
+
 interface TaskCardProps {
   task: Task;
   epicName: string | null;
@@ -24,9 +39,9 @@ interface TaskCardProps {
 }
 
 const cardPadding: Record<CardDensity, string> = {
-  compact: 'p-2.5',
-  normal: 'p-4',
-  comfortable: 'p-5',
+  compact: 'p-3.5',
+  normal: 'p-5',
+  comfortable: 'p-6',
 };
 
 const sectionGap: Record<CardDensity, string> = {
@@ -42,15 +57,15 @@ const sectionGapLarge: Record<CardDensity, string> = {
 };
 
 const idTextSize: Record<CardDensity, string> = {
-  compact: 'text-[10px]',
-  normal: 'text-[11px]',
-  comfortable: 'text-[11px]',
+  compact: 'text-xs',
+  normal: 'text-xs',
+  comfortable: 'text-xs',
 };
 
 const timeTextSize: Record<CardDensity, string> = {
-  compact: 'text-[10px]',
-  normal: 'text-[11px]',
-  comfortable: 'text-xs',
+  compact: 'text-xs',
+  normal: 'text-xs',
+  comfortable: 'text-sm',
 };
 
 export function TaskCard({
@@ -97,7 +112,8 @@ export function TaskCard({
       data-task-id={task.id}
       className={cn(
         cardPadding[cardDensity],
-        'hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words cursor-grab active:cursor-grabbing',
+        'hover:ring-1 transition-all duration-100 bg-accent w-full flex flex-col break-words cursor-grab active:cursor-grabbing border border-border/40 border-l-4',
+        getPriorityBorderColor(task.priority),
         isDragging && 'opacity-0',
         isPressing && 'ring-2 ring-ring scale-[0.98] transition-all duration-150 delay-150'
       )}
@@ -111,7 +127,7 @@ export function TaskCard({
       onPointerUp={longPress.onPointerUp}
     >
       <div className="flex items-start justify-between gap-3">
-        <h4 className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground">
+        <h4 className="min-w-0 flex-1 text-base font-semibold leading-6 text-foreground">
           {task.title}
         </h4>
         <PriorityBadge priority={task.priority} />
@@ -119,13 +135,13 @@ export function TaskCard({
 
       <div
         className={cn(
-          'flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground',
+          'flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground',
           sectionGap[cardDensity]
         )}
       >
         <span
           className={cn(
-            'inline-flex items-center gap-1 font-mono font-medium text-foreground/75',
+            'inline-flex items-center gap-1 font-semibold text-foreground/75',
             idTextSize[cardDensity]
           )}
         >
@@ -133,7 +149,7 @@ export function TaskCard({
           {task.id}
         </span>
         {epicName && (
-          <span className="inline-flex min-w-0 items-center gap-1">
+          <span className="inline-flex min-w-0 items-center gap-1 font-medium">
             <Layers className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{epicName}</span>
           </span>
@@ -146,7 +162,7 @@ export function TaskCard({
           {task.blocks.map((blockId) => (
             <span
               key={blockId}
-              className="inline-flex items-center gap-1 rounded border border-rose-500/20 bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-medium text-rose-600 dark:text-rose-400"
+              className="inline-flex items-center gap-1 rounded border border-red-500/30 bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-700 dark:text-red-300"
               title={`Blocks ${blockId}`}
             >
               <ArrowRightFromLine className="h-2.5 w-2.5" />
@@ -156,7 +172,7 @@ export function TaskCard({
           {task.dependsOn.map((depId) => (
             <span
               key={depId}
-              className="inline-flex items-center gap-1 rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+              className="inline-flex items-center gap-1 rounded border border-blue-500/30 bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:text-blue-300"
               title={`Depends on ${depId}`}
             >
               <ArrowLeftToLine className="h-2.5 w-2.5" />
@@ -169,7 +185,7 @@ export function TaskCard({
       {task.description && (
         <p
           className={cn(
-            'line-clamp-2 text-xs leading-5 text-muted-foreground',
+            'line-clamp-2 text-sm leading-5 text-muted-foreground',
             sectionGapLarge[cardDensity]
           )}
         >

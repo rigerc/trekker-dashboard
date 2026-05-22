@@ -5,17 +5,13 @@ import { Package, Plus, SlidersHorizontal } from 'lucide-react';
 import { NotificationToggle } from '@/components/notification-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import type { ProjectConfig } from '@/types';
-
 interface AppHeaderActionsProps {
-  projectConfig?: ProjectConfig;
   projectName?: string;
   onNewClick?: () => void;
   onProjectConfigClick: () => void;
 }
 
 export function AppHeaderActions({
-  projectConfig,
   projectName,
   onNewClick,
   onProjectConfigClick,
@@ -27,7 +23,7 @@ export function AppHeaderActions({
     </div>
   );
 
-  const projectConfigButton = projectConfig && (
+  const projectConfigButton = (
     <Button size="sm" variant="outline" onClick={onProjectConfigClick}>
       <SlidersHorizontal className="h-4 w-4" />
       <span className="hidden sm:inline ml-1">Settings</span>
