@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { DependencyGraphRow } from '@/pages/dependency-graph-components';
 import { DependencyFlowView } from '@/pages/dependency-graph-flow';
 import { EntityDetailModals } from '@/pages/entity-detail-modals';
+import { usePreferences } from '@/stores/preferences';
 import type { Task } from '@/types';
 
 interface DependencyEdge {
@@ -55,9 +56,10 @@ function getGraphTasks(tasks: Task[], edges: DependencyEdge[], searchQuery: stri
 
 export function DependencyGraphPage() {
   const { epics, error, isLoading, refetch, tasks } = useAppData();
+  const { preferences } = usePreferences();
   const detailActions = useTaskDetailActions(tasks, epics);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'graph'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'graph'>(() => preferences.defaultGraphView);
 
   const edges = useMemo(() => getDependencyEdges(tasks), [tasks]);
   const graphTasks = useMemo(
@@ -141,7 +143,7 @@ export function DependencyGraphPage() {
 
   return (
     <>
-      <main className="flex flex-1 flex-col gap-4 overflow-hidden p-5">
+      <main className="flex flex-1 flex-col gap-3 overflow-hidden p-3 sm:gap-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -153,7 +155,7 @@ export function DependencyGraphPage() {
             </p>
           </div>
 
-          <div className="flex items-end gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -164,28 +166,42 @@ export function DependencyGraphPage() {
               />
             </div>
 
-            <div className="flex items-center gap-1 rounded-lg border p-0.5">
+            <div className="grid grid-cols-2 items-center gap-1 rounded-lg border p-0.5 sm:flex">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={cn('rounded-md p-1.5 transition-colors', listButtonClass)}
+                className={cn(
+                  'inline-flex items-center justify-center gap-1.5 rounded-md p-1.5 text-sm transition-colors sm:text-base',
+                  listButtonClass
+                )}
                 title="List view"
               >
                 <List className="h-4 w-4" />
+                <span className="sm:hidden">List</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('graph')}
-                className={cn('rounded-md p-1.5 transition-colors', graphButtonClass)}
+                className={cn(
+                  'inline-flex items-center justify-center gap-1.5 rounded-md p-1.5 text-sm transition-colors sm:text-base',
+                  graphButtonClass
+                )}
                 title="Graph view"
               >
                 <GitBranch className="h-4 w-4" />
+                <span className="sm:hidden">Map</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:hidden">
+          <span>{edges.length} edges</span>
+          <span>{blockedCount} blocked</span>
+          <span>{blockerCount} blockers</span>
+        </div>
+
+        <div className="hidden gap-3 sm:grid sm:grid-cols-3">
           <div className="rounded-lg border bg-muted/20 p-3">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Edges
@@ -209,6 +225,7 @@ export function DependencyGraphPage() {
         <div
           className={cn(
             'flex-1 rounded-lg border',
+            viewMode === 'graph' && 'min-h-[72dvh] sm:min-h-0',
             containerOverflow,
             graphTasks.length === 0 && 'min-h-[280px]'
           )}

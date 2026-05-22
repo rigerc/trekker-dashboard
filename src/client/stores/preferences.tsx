@@ -4,10 +4,14 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useS
 
 export type CardDensity = 'compact' | 'normal' | 'comfortable';
 export type DefaultPage = '/' | '/list' | '/graph' | '/history';
+export type DefaultGraphView = 'list' | 'graph';
+export type DefaultHistoryView = 'all' | 'tasks' | 'epics' | 'comments' | 'dependencies';
 
 export interface UserPreferences {
   cardDensity: CardDensity;
   defaultPage: DefaultPage;
+  defaultGraphView: DefaultGraphView;
+  defaultHistoryView: DefaultHistoryView;
   listPageSize: number;
   listDefaultSort: string;
 }
@@ -15,6 +19,8 @@ export interface UserPreferences {
 export const DEFAULT_PREFERENCES: UserPreferences = {
   cardDensity: 'normal',
   defaultPage: '/',
+  defaultGraphView: 'list',
+  defaultHistoryView: 'all',
   listPageSize: 20,
   listDefaultSort: 'created:desc',
 };
@@ -44,6 +50,18 @@ function parseDefaultPage(value: unknown): DefaultPage {
   return DEFAULT_PREFERENCES.defaultPage;
 }
 
+function parseDefaultGraphView(value: unknown): DefaultGraphView {
+  if (value === 'graph') return value;
+  return DEFAULT_PREFERENCES.defaultGraphView;
+}
+
+function parseDefaultHistoryView(value: unknown): DefaultHistoryView {
+  if (value === 'tasks' || value === 'epics' || value === 'comments' || value === 'dependencies') {
+    return value;
+  }
+  return DEFAULT_PREFERENCES.defaultHistoryView;
+}
+
 function parseListPageSize(value: unknown): number {
   if (isValidListPageSize(value)) return value;
   return DEFAULT_PREFERENCES.listPageSize;
@@ -63,6 +81,8 @@ function getStoredPreferences(): UserPreferences {
     return {
       cardDensity: parseCardDensity(parsed.cardDensity),
       defaultPage: parseDefaultPage(parsed.defaultPage),
+      defaultGraphView: parseDefaultGraphView(parsed.defaultGraphView),
+      defaultHistoryView: parseDefaultHistoryView(parsed.defaultHistoryView),
       listPageSize: parseListPageSize(parsed.listPageSize),
       listDefaultSort: parseListDefaultSort(parsed.listDefaultSort),
     };

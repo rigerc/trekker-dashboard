@@ -5,6 +5,7 @@ import { Handle, type Node, type NodeProps, Position } from '@xyflow/react';
 import { PriorityBadge } from '@/components/priority-badge';
 import { StatusIcon } from '@/components/shared';
 import { STATUS_LABELS } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 import type { Task } from '@/types';
 
 const STATUS_ACCENT: Record<string, string> = {
@@ -16,6 +17,7 @@ const STATUS_ACCENT: Record<string, string> = {
 };
 
 interface DependencyNodeData {
+  compact?: boolean;
   task: Task;
   [key: string]: unknown;
 }
@@ -23,15 +25,22 @@ interface DependencyNodeData {
 export type DependencyFlowNode = Node<DependencyNodeData, 'dependency'>;
 
 function DependencyFlowNodeComponent({ data }: NodeProps<DependencyFlowNode>) {
-  const { task } = data;
+  const { compact, task } = data;
   const accent = STATUS_ACCENT[task.status] ?? '#6b7280';
+  let nodeWidthClass = 'w-[220px]';
+  if (compact) {
+    nodeWidthClass = 'w-[210px]';
+  }
 
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <div
-        className="flex w-[220px] flex-col gap-2 rounded-md border bg-card p-3 text-left"
-        style={{ borderLeftColor: accent, borderLeftWidth: 3 }}
+        className={cn(
+          'flex flex-col gap-2 rounded-md border bg-card p-3 text-left shadow-xs',
+          nodeWidthClass
+        )}
+        style={{ boxShadow: `inset 0 2px 0 ${accent}` }}
       >
         <div className="flex items-start justify-between gap-3">
           <span className="min-w-0 flex-1 truncate text-sm font-semibold leading-5">

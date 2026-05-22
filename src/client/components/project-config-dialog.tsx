@@ -20,7 +20,12 @@ import {
 } from '@/components/ui/select';
 import { useProjectConfigForm } from '@/components/use-project-config-form';
 import { SORT_OPTIONS } from '@/lib/sort';
-import type { CardDensity, DefaultPage } from '@/stores/preferences';
+import type {
+  CardDensity,
+  DefaultGraphView,
+  DefaultHistoryView,
+  DefaultPage,
+} from '@/stores/preferences';
 import type { ProjectConfig } from '@/types';
 
 const CARD_DENSITY_OPTIONS: { value: CardDensity; label: string }[] = [
@@ -34,6 +39,19 @@ const DEFAULT_PAGE_OPTIONS: { value: DefaultPage; label: string }[] = [
   { value: '/list', label: 'List' },
   { value: '/graph', label: 'Graph' },
   { value: '/history', label: 'History' },
+];
+
+const DEFAULT_GRAPH_VIEW_OPTIONS: { value: DefaultGraphView; label: string }[] = [
+  { value: 'list', label: 'List' },
+  { value: 'graph', label: 'Graph map' },
+];
+
+const DEFAULT_HISTORY_VIEW_OPTIONS: { value: DefaultHistoryView; label: string }[] = [
+  { value: 'all', label: 'All events' },
+  { value: 'tasks', label: 'Tasks and subtasks' },
+  { value: 'epics', label: 'Epics' },
+  { value: 'comments', label: 'Comments' },
+  { value: 'dependencies', label: 'Dependencies' },
 ];
 
 const LIST_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
@@ -147,6 +165,44 @@ export function ProjectConfigDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {DEFAULT_PAGE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="default-graph-view">Default graph view</Label>
+              <Select
+                value={form.defaultGraphView}
+                onValueChange={(value) => handleFieldChange('defaultGraphView', value)}
+              >
+                <SelectTrigger id="default-graph-view">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DEFAULT_GRAPH_VIEW_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="default-history-view">Default history view</Label>
+              <Select
+                value={form.defaultHistoryView}
+                onValueChange={(value) => handleFieldChange('defaultHistoryView', value)}
+              >
+                <SelectTrigger id="default-history-view">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DEFAULT_HISTORY_VIEW_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>

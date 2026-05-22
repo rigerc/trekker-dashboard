@@ -5,7 +5,13 @@ import { toast } from 'sonner';
 
 import { useUpdateProjectConfig } from '@/hooks/use-data';
 import { getErrorMessage } from '@/lib/errors';
-import type { CardDensity, DefaultPage, UserPreferences } from '@/stores/preferences';
+import type {
+  CardDensity,
+  DefaultGraphView,
+  DefaultHistoryView,
+  DefaultPage,
+  UserPreferences,
+} from '@/stores/preferences';
 import { DEFAULT_PREFERENCES, usePreferences } from '@/stores/preferences';
 import type { ProjectConfig } from '@/types';
 
@@ -21,6 +27,8 @@ interface SettingsFormState {
   commentPrefix: string;
   cardDensity: CardDensity;
   defaultPage: DefaultPage;
+  defaultGraphView: DefaultGraphView;
+  defaultHistoryView: DefaultHistoryView;
   listPageSize: number;
   listDefaultSort: string;
 }
@@ -35,6 +43,8 @@ function getInitialForm(
     commentPrefix: projectConfig?.commentPrefix ?? '',
     cardDensity: preferences?.cardDensity ?? DEFAULT_PREFERENCES.cardDensity,
     defaultPage: preferences?.defaultPage ?? DEFAULT_PREFERENCES.defaultPage,
+    defaultGraphView: preferences?.defaultGraphView ?? DEFAULT_PREFERENCES.defaultGraphView,
+    defaultHistoryView: preferences?.defaultHistoryView ?? DEFAULT_PREFERENCES.defaultHistoryView,
     listPageSize: preferences?.listPageSize ?? DEFAULT_PREFERENCES.listPageSize,
     listDefaultSort: preferences?.listDefaultSort ?? DEFAULT_PREFERENCES.listDefaultSort,
   };
@@ -81,6 +91,8 @@ export function useProjectConfigForm({
       setPreferences({
         cardDensity: form.cardDensity,
         defaultPage: form.defaultPage,
+        defaultGraphView: form.defaultGraphView,
+        defaultHistoryView: form.defaultHistoryView,
         listPageSize: form.listPageSize,
         listDefaultSort: form.listDefaultSort,
       });
