@@ -7,6 +7,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from '@/app';
 import { Providers } from '@/components/providers';
 
+if ('serviceWorker' in navigator) {
+  void navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      void registration.unregister();
+    }
+  });
+}
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
