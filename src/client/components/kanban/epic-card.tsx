@@ -2,7 +2,7 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Layers } from 'lucide-react';
+import { Layers, SquareCheck } from 'lucide-react';
 
 import { useLongPress } from '@/components/kanban/use-long-press';
 import { PriorityBadge } from '@/components/priority-badge';
@@ -11,7 +11,7 @@ import { FULL_PERCENTAGE } from '@/lib/constants';
 import { formatRelativeTime } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import type { CardDensity } from '@/stores/preferences';
-import type { Epic } from '@/types';
+import type { Epic, Task } from '@/types';
 
 interface EpicCardProps {
   epic: Epic;
@@ -19,6 +19,9 @@ interface EpicCardProps {
   onClick: () => void;
   onLongPress?: () => void;
   cardDensity?: CardDensity;
+  childTasks?: Task[];
+  subtasksByParent?: (taskId: string) => Task[];
+  onChildTaskClick?: (task: Task) => void;
 }
 
 const cardPadding: Record<CardDensity, string> = {
@@ -57,6 +60,9 @@ export function EpicCard({
   onClick,
   onLongPress,
   cardDensity = 'normal',
+  childTasks = [],
+  subtasksByParent,
+  onChildTaskClick,
 }: EpicCardProps) {
   let percentage = 0;
   if (taskCount.total > 0) {
@@ -86,6 +92,14 @@ export function EpicCard({
   function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
     longPress.onPointerDown(event);
     draggableListeners.onPointerDown?.(event);
+  }
+
+  const visibleChildTasks = childTasks.slice(0, 4);
+  const hiddenChildCount = Math.max(0, childTasks.length - visibleChildTasks.length);
+
+  function handleChildClick(event: React.MouseEvent<HTMLButtonElement>, task: Task) {
+    event.stopPropagation();
+    onChildTaskClick?.(task);
   }
 
   return (
@@ -139,6 +153,33 @@ export function EpicCard({
         </div>
         {taskCount.total > 0 && <Progress value={percentage} className="h-1.5" />}
       </div>
+
+      {visibleChildTasks.length > 0 && (
+        <div className={cn('space-y-1.5 border-t pt-3', sectionGapLarge[cardDensity])}>
+          {visibleChildTasks.map((task) => {
+            const subtaskCount = subtasksByParent?.(task.id).length ?? 0;
+            return (
+              <button
+                key={task.id}
+                type="button"
+                className="flex w-full items-center gap-2 rounded-sm px-1 py-0.5 text-left text-xs text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground"
+                onClick={(event) => handleChildClick(event, task)}
+              >
+                <SquareCheck className="h-3 w-3 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{task.title}</span>
+                {subtaskCount > 0 && (
+                  <span className="shrink-0 font-mono text-[10px]">{subtaskCount}</span>
+                )}
+              </button>
+            );
+          })}
+          {hiddenChildCount > 0 && (
+            <div className="px-1 text-[11px] text-muted-foreground">
+              +{hiddenChildCount} more tasks
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

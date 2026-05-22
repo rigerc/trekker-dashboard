@@ -69,8 +69,14 @@ export function ProjectConfigDialog({
   projectName,
   projectConfig,
 }: ProjectConfigDialogProps) {
-  const { form, handleFieldChange, handleNumberChange, handleSubmit, isPending } =
-    useProjectConfigForm({ open, onOpenChange, projectConfig });
+  const {
+    form,
+    handleBooleanChange,
+    handleFieldChange,
+    handleNumberChange,
+    handleSubmit,
+    isPending,
+  } = useProjectConfigForm({ open, onOpenChange, projectConfig });
 
   let descriptionPrefix = '';
   if (projectName) {
@@ -247,6 +253,25 @@ export function ProjectConfigDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="group-related-work">Group related work</Label>
+              <Select
+                value={String(form.groupRelatedWork)}
+                onValueChange={(value) => handleBooleanChange('groupRelatedWork', value)}
+              >
+                <SelectTrigger id="group-related-work">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="false">Flat list and board</SelectItem>
+                  <SelectItem value="true">Group epics, tasks, and subtasks</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Keeps child tasks next to their epic or parent task in list and kanban views.
+              </p>
             </div>
           </div>
 

@@ -295,6 +295,7 @@ export function KanbanBoard({
             onArchiveAll={getArchiveHandler(column.key)}
             activeItem={activeItem}
             cardDensity={preferences.cardDensity}
+            groupRelatedWork={preferences.groupRelatedWork}
           />
         ))}
       </div>

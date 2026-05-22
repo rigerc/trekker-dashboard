@@ -4,13 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import type { ListItem, ListResponse } from '@/hooks/use-list';
 import { PRIORITY_LABELS, PRIORITY_STYLES, STATUS_LABELS, STATUS_STYLES } from '@/lib/constants';
 import { formatDate } from '@/lib/date';
+import type { GroupedListItem } from '@/lib/group-related-work';
 import { cn } from '@/lib/utils';
 import { PageResultsFrame } from '@/pages/page-results-frame';
 
 interface ListPageResultsProps {
   error: unknown;
   isLoading: boolean;
-  items: ListItem[];
+  items: (ListItem | GroupedListItem)[];
   onRowClick: (item: ListItem) => void;
   response: ListResponse | undefined;
 }
@@ -25,6 +26,21 @@ function getTypeBadgeClassName(type: ListItem['type']): string {
   }
 
   return 'border-gray-500 text-gray-500';
+}
+
+function getItemDepth(item: ListItem | GroupedListItem): number {
+  if ('depth' in item) return item.depth;
+  return 0;
+}
+
+function getChildCount(item: ListItem | GroupedListItem): number {
+  if ('childCount' in item) return item.childCount;
+  return 0;
+}
+
+function getMobileTitlePrefix(item: ListItem | GroupedListItem): string {
+  if (getItemDepth(item) > 0) return '↳ ';
+  return '';
 }
 
 export function ListPageResults({
@@ -56,7 +72,8 @@ export function ListPageResults({
                   key={item.id}
                   className={cn(
                     'cursor-pointer border-t transition-colors hover:bg-muted/30',
-                    item.type === 'epic' && 'border-l-[3px] border-l-primary/20 bg-primary/[0.02]'
+                    item.type === 'epic' && 'bg-primary/[0.02]',
+                    getItemDepth(item) > 0 && 'bg-muted/[0.18]'
                   )}
                   onClick={() => onRowClick(item)}
                 >
@@ -66,7 +83,23 @@ export function ListPageResults({
                       {item.type}
                     </Badge>
                   </td>
-                  <td className="max-w-md truncate px-4 py-3 font-medium">{item.title}</td>
+                  <td className="max-w-md px-4 py-3 font-medium">
+                    <div
+                      className={cn(
+                        'flex min-w-0 items-center gap-2',
+                        getItemDepth(item) === 1 && 'pl-5',
+                        getItemDepth(item) === 2 && 'pl-10'
+                      )}
+                    >
+                      {getItemDepth(item) > 0 && <span className="text-muted-foreground">↳</span>}
+                      <span className="truncate">{item.title}</span>
+                      {getChildCount(item) > 0 && (
+                        <span className="shrink-0 text-xs font-normal text-muted-foreground">
+                          {getChildCount(item)} related
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <Badge
                       style={{
@@ -103,12 +136,15 @@ export function ListPageResults({
                 key={item.id}
                 className={cn(
                   'px-4 py-3 cursor-pointer transition-colors hover:bg-muted/30 active:bg-muted/50',
-                  item.type === 'epic' && 'border-l-[3px] border-l-primary/20 bg-primary/[0.02]'
+                  item.type === 'epic' && 'bg-primary/[0.02]',
+                  getItemDepth(item) === 1 && 'pl-8',
+                  getItemDepth(item) === 2 && 'pl-12'
                 )}
                 onClick={() => onRowClick(item)}
               >
                 <div className="flex items-start gap-3 mb-1">
                   <span className="text-sm font-semibold leading-snug flex-1 min-w-0 line-clamp-2">
+                    {getMobileTitlePrefix(item)}
                     {item.title}
                   </span>
                   <Badge

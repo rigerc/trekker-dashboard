@@ -14,6 +14,7 @@ export interface UserPreferences {
   defaultHistoryView: DefaultHistoryView;
   listPageSize: number;
   listDefaultSort: string;
+  groupRelatedWork: boolean;
 }
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
@@ -23,6 +24,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   defaultHistoryView: 'all',
   listPageSize: 20,
   listDefaultSort: 'created:desc',
+  groupRelatedWork: false,
 };
 
 const STORAGE_KEY = 'trekker-preferences';
@@ -72,6 +74,11 @@ function parseListDefaultSort(value: unknown): string {
   return DEFAULT_PREFERENCES.listDefaultSort;
 }
 
+function parseGroupRelatedWork(value: unknown): boolean {
+  if (typeof value === 'boolean') return value;
+  return DEFAULT_PREFERENCES.groupRelatedWork;
+}
+
 function getStoredPreferences(): UserPreferences {
   if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
   try {
@@ -85,6 +92,7 @@ function getStoredPreferences(): UserPreferences {
       defaultHistoryView: parseDefaultHistoryView(parsed.defaultHistoryView),
       listPageSize: parseListPageSize(parsed.listPageSize),
       listDefaultSort: parseListDefaultSort(parsed.listDefaultSort),
+      groupRelatedWork: parseGroupRelatedWork(parsed.groupRelatedWork),
     };
   } catch {
     return DEFAULT_PREFERENCES;

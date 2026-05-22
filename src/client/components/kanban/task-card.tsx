@@ -20,6 +20,7 @@ interface TaskCardProps {
   onClick: () => void;
   onLongPress?: () => void;
   cardDensity?: CardDensity;
+  showSubtaskList?: boolean;
 }
 
 const cardPadding: Record<CardDensity, string> = {
@@ -59,6 +60,7 @@ export function TaskCard({
   onClick,
   onLongPress,
   cardDensity = 'normal',
+  showSubtaskList = false,
 }: TaskCardProps) {
   const completedSubtasks = subtasks.filter((s) => s.status === 'completed').length;
   const hasDependencies = task.dependsOn.length > 0 || task.blocks.length > 0;
@@ -188,6 +190,24 @@ export function TaskCard({
       {subtasks.length > 0 && (
         <div className={sectionGapLarge[cardDensity]}>
           <SubtaskProgress completed={completedSubtasks} total={subtasks.length} />
+          {showSubtaskList && (
+            <div className="mt-2 space-y-1">
+              {subtasks.slice(0, 3).map((subtask) => (
+                <div
+                  key={subtask.id}
+                  className="flex items-center gap-2 text-xs text-muted-foreground"
+                >
+                  <span>↳</span>
+                  <span className="min-w-0 flex-1 truncate">{subtask.title}</span>
+                </div>
+              ))}
+              {subtasks.length > 3 && (
+                <div className="text-[11px] text-muted-foreground">
+                  +{subtasks.length - 3} more subtasks
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

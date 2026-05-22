@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useAppData } from '@/hooks/use-data';
 import { type ListEntityType, type ListFilters, type ListItem, useList } from '@/hooks/use-list';
 import { useTaskDetailActions } from '@/hooks/use-task-detail-actions';
+import {
+  buildGroupedListItems,
+  type GroupedListItem,
+  paginateGroupedItems,
+} from '@/lib/group-related-work';
 import { usePreferences } from '@/stores/preferences';
 
 export function useListPageState() {
-  const { epics, refetch, tasks } = useAppData();
+  const { epics, error: appDataError, isLoading: isAppDataLoading, refetch, tasks } = useAppData();
   const { preferences } = usePreferences();
   const detailActions = useTaskDetailActions(tasks, epics);
   const [filters, setFilters] = useState<ListFilters>({
@@ -16,6 +21,7 @@ export function useListPageState() {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const { data, error, isLoading } = useList(filters);
+  const groupRelatedWork = preferences.groupRelatedWork;
 
   function handleRowClick(item: ListItem) {
     if (item.type === 'epic') {
@@ -54,8 +60,24 @@ export function useListPageState() {
     setSearchQuery('');
   }
 
-  let filteredItems: ListItem[] = [];
-  if (data) {
+  const groupedItems = useMemo(() => {
+    if (!groupRelatedWork) return [];
+    return buildGroupedListItems({ epics, filters, searchQuery, tasks });
+  }, [epics, filters, groupRelatedWork, searchQuery, tasks]);
+
+  let filteredItems: (ListItem | GroupedListItem)[] = [];
+  let listResponse = data;
+  if (groupRelatedWork) {
+    const limit = filters.limit ?? preferences.listPageSize;
+    const page = filters.page ?? 1;
+    filteredItems = paginateGroupedItems(groupedItems, page, limit);
+    listResponse = {
+      total: groupedItems.length,
+      page,
+      limit,
+      items: filteredItems,
+    };
+  } else if (data) {
     filteredItems = data.items.filter((item) => {
       if (!searchQuery) {
         return true;
@@ -72,21 +94,28 @@ export function useListPageState() {
     filters.types?.length || filters.statuses?.length || filters.priorities?.length
   );
   let totalPages = 0;
-  if (data) {
-    totalPages = Math.ceil(data.total / (filters.limit ?? preferences.listPageSize));
+  if (listResponse) {
+    totalPages = Math.ceil(listResponse.total / (filters.limit ?? preferences.listPageSize));
+  }
+
+  let effectiveError = error;
+  let effectiveIsLoading = isLoading;
+  if (groupRelatedWork) {
+    effectiveError = appDataError;
+    effectiveIsLoading = isAppDataLoading;
   }
 
   return {
     ...detailActions,
     clearFilters,
-    data,
+    data: listResponse,
     epics,
-    error,
+    error: effectiveError,
     filteredItems,
     filters,
     handleRowClick,
     hasActiveFilters,
-    isLoading,
+    isLoading: effectiveIsLoading,
     refetch,
     searchQuery,
     setFilters,

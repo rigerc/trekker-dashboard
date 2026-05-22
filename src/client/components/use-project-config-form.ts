@@ -31,6 +31,7 @@ interface SettingsFormState {
   defaultHistoryView: DefaultHistoryView;
   listPageSize: number;
   listDefaultSort: string;
+  groupRelatedWork: boolean;
 }
 
 function getInitialForm(
@@ -47,6 +48,7 @@ function getInitialForm(
     defaultHistoryView: preferences?.defaultHistoryView ?? DEFAULT_PREFERENCES.defaultHistoryView,
     listPageSize: preferences?.listPageSize ?? DEFAULT_PREFERENCES.listPageSize,
     listDefaultSort: preferences?.listDefaultSort ?? DEFAULT_PREFERENCES.listDefaultSort,
+    groupRelatedWork: preferences?.groupRelatedWork ?? DEFAULT_PREFERENCES.groupRelatedWork,
   };
 }
 
@@ -79,6 +81,13 @@ export function useProjectConfigForm({
     }));
   }
 
+  function handleBooleanChange(field: 'groupRelatedWork', value: string) {
+    setForm((current) => ({
+      ...current,
+      [field]: value === 'true',
+    }));
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -95,6 +104,7 @@ export function useProjectConfigForm({
         defaultHistoryView: form.defaultHistoryView,
         listPageSize: form.listPageSize,
         listDefaultSort: form.listDefaultSort,
+        groupRelatedWork: form.groupRelatedWork,
       });
       toast.success('Settings saved');
       onOpenChange(false);
@@ -105,6 +115,7 @@ export function useProjectConfigForm({
 
   return {
     form,
+    handleBooleanChange,
     handleFieldChange,
     handleNumberChange,
     handleSubmit,

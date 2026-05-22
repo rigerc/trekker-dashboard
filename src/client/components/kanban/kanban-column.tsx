@@ -39,6 +39,7 @@ interface KanbanColumnProps {
   onArchiveAll?: () => void;
   activeItem: ActiveItem | null;
   cardDensity: CardDensity;
+  groupRelatedWork: boolean;
 }
 
 const CARD_LIST_GAP: Record<CardDensity, string> = {
@@ -83,6 +84,7 @@ export function KanbanColumn({
   onArchiveAll,
   activeItem,
   cardDensity,
+  groupRelatedWork,
 }: KanbanColumnProps) {
   const [filter, setFilter] = useState<ColumnFilterState>(DEFAULT_FILTER);
 
@@ -101,8 +103,12 @@ export function KanbanColumn({
 
   const filteredTasks = useMemo(() => {
     if (filter.type === 'epic') return [];
-    return [...tasks].sort((a, b) => compareBySortOption(a, b, filter.sort));
-  }, [tasks, filter]);
+    let visibleTasks = tasks;
+    if (groupRelatedWork) {
+      visibleTasks = tasks.filter((task) => !task.epicId);
+    }
+    return [...visibleTasks].sort((a, b) => compareBySortOption(a, b, filter.sort));
+  }, [groupRelatedWork, tasks, filter]);
 
   const totalCount = filteredTasks.length + filteredEpics.length;
   const filterSummary = getFilterSummary(filter);
@@ -116,10 +122,21 @@ export function KanbanColumn({
 
   const getSubtasks = (taskId: string) => allTasks.filter((t) => t.parentTaskId === taskId);
 
+  const getTasksForEpic = (epicId: string) =>
+    allTasks.filter((t) => t.epicId === epicId && !t.parentTaskId);
+
   const getTaskCountForEpic = (epicId: string) => {
     const epicTasks = allTasks.filter((t) => t.epicId === epicId && !t.parentTaskId);
     const completed = epicTasks.filter((t) => t.status === 'completed').length;
     return { total: epicTasks.length, completed };
+  };
+
+  const getGroupedEpicProps = (epicId: string) => {
+    if (!groupRelatedWork) return {};
+    return {
+      childTasks: getTasksForEpic(epicId),
+      subtasksByParent: getSubtasks,
+    };
   };
 
   return (
@@ -183,6 +200,8 @@ export function KanbanColumn({
               key={epic.id}
               epic={epic}
               taskCount={getTaskCountForEpic(epic.id)}
+              {...getGroupedEpicProps(epic.id)}
+              onChildTaskClick={onTaskClick}
               onClick={() => onEpicClick(epic)}
               onLongPress={() => onEpicLongPress?.(epic)}
               cardDensity={cardDensity}
@@ -194,6 +213,7 @@ export function KanbanColumn({
               task={task}
               epicName={getEpicName(task.epicId)}
               subtasks={getSubtasks(task.id)}
+              showSubtaskList={groupRelatedWork}
               onClick={() => onTaskClick(task)}
               onLongPress={() => onTaskLongPress?.(task)}
               cardDensity={cardDensity}
