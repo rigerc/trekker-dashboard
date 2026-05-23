@@ -3,6 +3,7 @@ import { DEFAULT_PRIORITY } from '@server/lib/constants';
 import type { Epic } from '@server/lib/db';
 import { epics, getDb, projects, tasks } from '@server/lib/db';
 import { generateId } from '@server/lib/id-generator';
+import { withRetry } from '@server/lib/retry';
 import { eq } from 'drizzle-orm';
 
 interface CreateEpicInput {
@@ -61,7 +62,7 @@ export async function create(input: CreateEpicInput): Promise<Epic> {
     updatedAt: now,
   };
 
-  await db.insert(epics).values(epic);
+  await withRetry(() => db.insert(epics).values(epic));
 
   return epic;
 }
@@ -78,7 +79,7 @@ export async function update(id: string, input: UpdateEpicInput): Promise<Epic> 
   if (input.status !== undefined) updates.status = input.status;
   if (input.priority !== undefined) updates.priority = input.priority;
 
-  await db.update(epics).set(updates).where(eq(epics.id, id));
+  await withRetry(() => db.update(epics).set(updates).where(eq(epics.id, id)));
 
   return getById(id);
 }
@@ -89,7 +90,8 @@ export async function remove(id: string): Promise<void> {
   // Verify epic exists
   await getById(id);
 
-  await db.update(tasks).set({ epicId: null, updatedAt: new Date() }).where(eq(tasks.epicId, id));
-
-  await db.delete(epics).where(eq(epics.id, id));
+  await withRetry(async () => {
+    await db.update(tasks).set({ epicId: null, updatedAt: new Date() }).where(eq(tasks.epicId, id));
+    await db.delete(epics).where(eq(epics.id, id));
+  });
 }

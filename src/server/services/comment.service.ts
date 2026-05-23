@@ -2,6 +2,7 @@ import { NotFoundError } from '@server/errors';
 import type { Comment } from '@server/lib/db';
 import { comments, getDb, tasks } from '@server/lib/db';
 import { generateId } from '@server/lib/id-generator';
+import { withRetry } from '@server/lib/retry';
 import { eq } from 'drizzle-orm';
 
 interface CreateCommentInput {
@@ -51,7 +52,7 @@ export async function create(taskId: string, input: CreateCommentInput): Promise
     updatedAt: now,
   };
 
-  await db.insert(comments).values(comment);
+  await withRetry(() => db.insert(comments).values(comment));
 
   return comment;
 }
@@ -62,5 +63,5 @@ export async function remove(id: string): Promise<void> {
   // Verify comment exists
   await getById(id);
 
-  await db.delete(comments).where(eq(comments.id, id));
+  await withRetry(() => db.delete(comments).where(eq(comments.id, id)));
 }
