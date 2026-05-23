@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { NativePopover } from '@/components/ui/native-popover';
 import { SORT_OPTIONS, type SortOption } from '@/lib/sort';
 
+// Kanban columns don't use grouped work, so build-order is not applicable.
+const KANBAN_SORT_OPTIONS = SORT_OPTIONS.filter((opt) => opt.value !== 'build-order');
+
 export type TypeFilter = 'all' | 'epic' | 'task';
 
 export interface ColumnFilterState {
@@ -76,13 +79,13 @@ export function ColumnFilter({ value, onChange, label }: ColumnFilterProps) {
             value={value.sort}
             onChange={(e) => {
               const sort = e.target.value;
-              if (SORT_OPTIONS.some((opt) => opt.value === sort)) {
+              if (KANBAN_SORT_OPTIONS.some((opt) => opt.value === sort)) {
                 onChange({ ...value, sort: sort as SortOption });
               }
             }}
             className={nativeSelectStyles}
           >
-            {SORT_OPTIONS.map((opt) => (
+            {KANBAN_SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>

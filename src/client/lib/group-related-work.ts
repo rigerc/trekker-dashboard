@@ -1,5 +1,6 @@
 import type { ListFilters, ListItem } from '@/hooks/use-list';
 import { compareBySortOption, type SortOption } from '@/lib/sort';
+import { topologicalSort } from '@/lib/topological-sort';
 import type { Epic, Task } from '@/types';
 
 export interface GroupedListItem extends ListItem {
@@ -58,7 +59,8 @@ function toSortOption(value: string | undefined): SortOption {
     value === 'priority:asc' ||
     value === 'priority:desc' ||
     value === 'title:asc' ||
-    value === 'title:desc'
+    value === 'title:desc' ||
+    value === 'build-order'
   ) {
     return value;
   }
@@ -105,11 +107,16 @@ export function buildGroupedListItems({
 
   const rows: GroupedListItem[] = [];
 
+  function sortTaskArray(taskList: Task[]): Task[] {
+    if (sort === 'build-order') {
+      return topologicalSort(taskList);
+    }
+    return [...taskList].sort((a, b) => compareBySortOption(a, b, sort));
+  }
+
   function includeTaskTree(task: Task, depth: 0 | 1 | 2): GroupedListItem[] {
     const item = taskToListItem(task);
-    const subtasks = [...(subtasksByParent.get(task.id) ?? [])].sort((a, b) =>
-      compareBySortOption(a, b, sort)
-    );
+    const subtasks = sortTaskArray(subtasksByParent.get(task.id) ?? []);
     const childRows = subtasks.flatMap((subtask) => includeTaskTree(subtask, 2));
     const includeSelf = matchesFilters(item, filters, searchQuery);
     if (!includeSelf && childRows.length === 0) return [];
@@ -121,9 +128,7 @@ export function buildGroupedListItems({
   const sortedEpics = [...epics].sort((a, b) => compareBySortOption(a, b, sort));
   for (const epic of sortedEpics) {
     const item = epicToListItem(epic);
-    const epicTasks = [...(topLevelTasksByEpic.get(epic.id) ?? [])].sort((a, b) =>
-      compareBySortOption(a, b, sort)
-    );
+    const epicTasks = sortTaskArray(topLevelTasksByEpic.get(epic.id) ?? []);
     const childRows = epicTasks.flatMap((task) => {
       attachedTopLevelTaskIds.add(task.id);
       return includeTaskTree(task, 1);
@@ -134,20 +139,38 @@ export function buildGroupedListItems({
     rows.push({ ...item, depth: 0, childCount: childRows.length }, ...childRows);
   }
 
-  const standaloneTasks = tasks
-    .filter((task) => !task.parentTaskId && !attachedTopLevelTaskIds.has(task.id))
-    .sort((a, b) => compareBySortOption(a, b, sort));
+  const standaloneTasks = sortTaskArray(
+    tasks.filter((task) => !task.parentTaskId && !attachedTopLevelTaskIds.has(task.id))
+  );
   for (const task of standaloneTasks) {
     rows.push(...includeTaskTree(task, 0));
   }
 
-  const orphanSubtasks = tasks
-    .filter((task) => task.parentTaskId && !attachedSubtaskIds.has(task.id))
-    .sort((a, b) => compareBySortOption(a, b, sort));
-  for (const task of orphanSubtasks) {
-    const item = taskToListItem(task);
-    if (matchesFilters(item, filters, searchQuery)) {
-      rows.push({ ...item, depth: 0, childCount: 0 });
+  // For build-order: merge orphan subtasks into the standalone pool so
+  // cross-pool dependencies are respected in topological order.
+  if (sort === 'build-order') {
+    const orphanSubtasks = tasks.filter(
+      (task) => task.parentTaskId && !attachedSubtaskIds.has(task.id)
+    );
+    const combinedPool = sortTaskArray([...standaloneTasks, ...orphanSubtasks]);
+    // Remove already-added standalone tasks from combined, keep only orphans
+    const standaloneIds = new Set(standaloneTasks.map((t) => t.id));
+    const remainingOrphans = combinedPool.filter((t) => !standaloneIds.has(t.id));
+    for (const task of remainingOrphans) {
+      const item = taskToListItem(task);
+      if (matchesFilters(item, filters, searchQuery)) {
+        rows.push({ ...item, depth: 0, childCount: 0 });
+      }
+    }
+  } else {
+    const orphanSubtasks = sortTaskArray(
+      tasks.filter((task) => task.parentTaskId && !attachedSubtaskIds.has(task.id))
+    );
+    for (const task of orphanSubtasks) {
+      const item = taskToListItem(task);
+      if (matchesFilters(item, filters, searchQuery)) {
+        rows.push({ ...item, depth: 0, childCount: 0 });
+      }
     }
   }
 

@@ -113,6 +113,7 @@ export function useListPageState() {
     error: effectiveError,
     filteredItems,
     filters,
+    groupRelatedWork,
     handleRowClick,
     hasActiveFilters,
     isLoading: effectiveIsLoading,

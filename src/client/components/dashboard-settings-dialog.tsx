@@ -30,6 +30,9 @@ import type {
 } from '@/stores/preferences';
 import { DEFAULT_PREFERENCES, usePreferences } from '@/stores/preferences';
 
+// Build-order only works with grouped work; not a sensible default.
+const DEFAULT_SORT_OPTIONS = SORT_OPTIONS.filter((opt) => opt.value !== 'build-order');
+
 const CARD_DENSITY_OPTIONS: { value: CardDensity; label: string }[] = [
   { value: 'compact', label: 'Compact' },
   { value: 'normal', label: 'Normal' },
@@ -227,7 +230,7 @@ export function DashboardSettingsDialog({ open, onOpenChange }: DashboardSetting
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {SORT_OPTIONS.map((option) => (
+                {DEFAULT_SORT_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>

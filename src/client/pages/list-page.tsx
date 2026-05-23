@@ -16,6 +16,7 @@ export function ListPage() {
     error,
     filteredItems,
     filters,
+    groupRelatedWork,
     handleEpicModalTaskClick,
     handleRowClick,
     handleTaskModalEpicClick,
@@ -39,6 +40,7 @@ export function ListPage() {
       <main className="flex flex-1 flex-col gap-4 overflow-hidden p-5">
         <ListPageFilters
           filters={filters}
+          groupRelatedWork={groupRelatedWork}
           hasActiveFilters={hasActiveFilters}
           onClearFilters={clearFilters}
           onSearchQueryChange={setSearchQuery}

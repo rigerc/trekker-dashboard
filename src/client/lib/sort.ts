@@ -7,7 +7,8 @@ export type SortOption =
   | 'priority:asc'
   | 'priority:desc'
   | 'title:asc'
-  | 'title:desc';
+  | 'title:desc'
+  | 'build-order';
 
 interface SortOptionItem {
   value: SortOption;
@@ -22,6 +23,7 @@ export const SORT_OPTIONS: SortOptionItem[] = [
   { value: 'priority:desc', label: 'Priority (low to high)' },
   { value: 'title:asc', label: 'Title (A-Z)' },
   { value: 'title:desc', label: 'Title (Z-A)' },
+  { value: 'build-order', label: 'Implementation order' },
 ];
 
 interface Sortable {

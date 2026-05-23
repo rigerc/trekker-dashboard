@@ -30,6 +30,7 @@ const PRIORITY_OPTIONS: FilterOption[] = Object.entries(PRIORITY_LABELS).map(([v
 
 interface ListPageFiltersProps {
   filters: ListFilters;
+  groupRelatedWork: boolean;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
   onSearchQueryChange: (value: string) => void;
@@ -40,6 +41,7 @@ interface ListPageFiltersProps {
 
 export function ListPageFilters({
   filters,
+  groupRelatedWork,
   hasActiveFilters,
   onClearFilters,
   onSearchQueryChange,
@@ -51,6 +53,10 @@ export function ListPageFilters({
     onSetFilters(withResetPage(filters, updates));
   }
 
+  const sortOptions = groupRelatedWork
+    ? SORT_OPTIONS
+    : SORT_OPTIONS.filter((option) => option.value !== 'build-order');
+
   return (
     <ListPageFiltersView
       hasActiveFilters={hasActiveFilters}
@@ -58,7 +64,7 @@ export function ListPageFilters({
       priorityValue={serializeFilterValues(filters.priorities)}
       searchQuery={searchQuery}
       selectedTypes={filters.types ?? []}
-      sortOptions={SORT_OPTIONS}
+      sortOptions={sortOptions}
       sortValue={filters.sort ?? 'created:desc'}
       statusOptions={STATUS_OPTIONS}
       statusValue={serializeFilterValues(filters.statuses)}
