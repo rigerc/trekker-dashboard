@@ -97,7 +97,7 @@ export function getDb() {
   }
 
   const sqliteInstance = new Database(dbPath, {
-    create: false,
+    create: true,
     readwrite: true,
   });
   configureSqlite(sqliteInstance);
