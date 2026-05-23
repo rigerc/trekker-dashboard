@@ -1,8 +1,9 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, FolderOpen, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FolderOpen, Plus, Settings } from 'lucide-react';
 import { useState } from 'react';
 
+import { DashboardSettingsDialog } from '@/components/dashboard-settings-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ const PROJECT_INITIALS_LENGTH = 2;
 export function ProjectSidebar() {
   const [dbPath, setDbPath] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showDashboardSettings, setShowDashboardSettings] = useState(false);
   const { projects, activeProjectId, openProject, addProject, isAddingProject } = useProjects();
   const suggestions = useProjectSuggestions();
 
@@ -123,6 +125,25 @@ export function ProjectSidebar() {
           ))}
         </div>
       )}
+
+      <div className={cn('mt-4 border-t pt-3', isCollapsed && 'flex justify-center')}>
+        <Button
+          type="button"
+          variant="ghost"
+          size={isCollapsed ? 'icon-sm' : 'sm'}
+          className={cn('text-muted-foreground', !isCollapsed && 'w-full justify-start gap-2')}
+          onClick={() => setShowDashboardSettings(true)}
+          aria-label="Dashboard settings"
+        >
+          <Settings className="h-4 w-4" />
+          {!isCollapsed && <span>Settings</span>}
+        </Button>
+      </div>
+
+      <DashboardSettingsDialog
+        open={showDashboardSettings}
+        onOpenChange={setShowDashboardSettings}
+      />
     </aside>
   );
 }

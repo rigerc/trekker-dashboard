@@ -12,11 +12,22 @@ const projectSchema = z.object({
   lastOpenedAt: z.string().min(1).optional(),
 });
 
+const preferencesSchema = z.object({
+  cardDensity: z.enum(['compact', 'normal', 'comfortable']).optional(),
+  defaultPage: z.enum(['/', '/list', '/graph', '/history']).optional(),
+  defaultGraphView: z.enum(['list', 'graph']).optional(),
+  defaultHistoryView: z.enum(['all', 'tasks', 'epics', 'comments', 'dependencies']).optional(),
+  listPageSize: z.number().int().positive().optional(),
+  listDefaultSort: z.string().optional(),
+  groupRelatedWork: z.boolean().optional(),
+});
+
 const dashboardConfigSchema = z.object({
   version: z.literal(1),
   openProjectId: z.string().min(1).nullable(),
   scanRoots: z.array(z.string()),
   projects: z.array(projectSchema),
+  preferences: preferencesSchema.optional(),
   settings: z.object({
     theme: z.enum(['light', 'dark', 'system']).optional(),
     density: z.enum(['comfortable', 'compact']).optional(),
@@ -27,6 +38,7 @@ export type DashboardProject = z.infer<typeof projectSchema>;
 export type DashboardConfig = z.infer<typeof dashboardConfigSchema>;
 export type DashboardConfigPatch = Partial<Pick<DashboardConfig, 'openProjectId' | 'scanRoots'>> & {
   settings?: Partial<DashboardConfig['settings']>;
+  preferences?: Partial<DashboardConfig['preferences']>;
 };
 
 const DEFAULT_CONFIG: DashboardConfig = {
@@ -34,6 +46,7 @@ const DEFAULT_CONFIG: DashboardConfig = {
   openProjectId: null,
   scanRoots: [process.cwd()],
   projects: [],
+  preferences: {},
   settings: {},
 };
 
@@ -166,6 +179,7 @@ export async function patchDashboardConfig(patch: DashboardConfigPatch): Promise
       ...config,
       openProjectId,
       scanRoots: patch.scanRoots ?? config.scanRoots,
+      preferences: { ...config.preferences, ...patch.preferences },
       settings: { ...config.settings, ...patch.settings },
     };
   });

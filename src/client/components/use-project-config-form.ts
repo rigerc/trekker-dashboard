@@ -5,14 +5,6 @@ import { toast } from 'sonner';
 
 import { useUpdateProjectConfig } from '@/hooks/use-data';
 import { getErrorMessage } from '@/lib/errors';
-import type {
-  CardDensity,
-  DefaultGraphView,
-  DefaultHistoryView,
-  DefaultPage,
-  UserPreferences,
-} from '@/stores/preferences';
-import { DEFAULT_PREFERENCES, usePreferences } from '@/stores/preferences';
 import type { ProjectConfig } from '@/types';
 
 interface ProjectConfigDialogStateOptions {
@@ -25,30 +17,13 @@ interface SettingsFormState {
   issuePrefix: string;
   epicPrefix: string;
   commentPrefix: string;
-  cardDensity: CardDensity;
-  defaultPage: DefaultPage;
-  defaultGraphView: DefaultGraphView;
-  defaultHistoryView: DefaultHistoryView;
-  listPageSize: number;
-  listDefaultSort: string;
-  groupRelatedWork: boolean;
 }
 
-function getInitialForm(
-  projectConfig?: ProjectConfig,
-  preferences?: UserPreferences
-): SettingsFormState {
+function getInitialForm(projectConfig?: ProjectConfig): SettingsFormState {
   return {
     issuePrefix: projectConfig?.issuePrefix ?? '',
     epicPrefix: projectConfig?.epicPrefix ?? '',
     commentPrefix: projectConfig?.commentPrefix ?? '',
-    cardDensity: preferences?.cardDensity ?? DEFAULT_PREFERENCES.cardDensity,
-    defaultPage: preferences?.defaultPage ?? DEFAULT_PREFERENCES.defaultPage,
-    defaultGraphView: preferences?.defaultGraphView ?? DEFAULT_PREFERENCES.defaultGraphView,
-    defaultHistoryView: preferences?.defaultHistoryView ?? DEFAULT_PREFERENCES.defaultHistoryView,
-    listPageSize: preferences?.listPageSize ?? DEFAULT_PREFERENCES.listPageSize,
-    listDefaultSort: preferences?.listDefaultSort ?? DEFAULT_PREFERENCES.listDefaultSort,
-    groupRelatedWork: preferences?.groupRelatedWork ?? DEFAULT_PREFERENCES.groupRelatedWork,
   };
 }
 
@@ -57,35 +32,15 @@ export function useProjectConfigForm({
   onOpenChange,
   projectConfig,
 }: ProjectConfigDialogStateOptions) {
-  const { preferences, setPreferences } = usePreferences();
-  const [form, setForm] = useState<SettingsFormState>(() =>
-    getInitialForm(projectConfig, preferences)
-  );
+  const [form, setForm] = useState<SettingsFormState>(() => getInitialForm(projectConfig));
   const updateProjectConfig = useUpdateProjectConfig();
 
   useEffect(() => {
-    setForm(getInitialForm(projectConfig, preferences));
-  }, [open, projectConfig, preferences]);
+    setForm(getInitialForm(projectConfig));
+  }, [open, projectConfig]);
 
   function handleFieldChange(field: keyof SettingsFormState, value: string) {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  }
-
-  function handleNumberChange(field: 'listPageSize', value: string) {
-    setForm((current) => ({
-      ...current,
-      [field]: Number(value),
-    }));
-  }
-
-  function handleBooleanChange(field: 'groupRelatedWork', value: string) {
-    setForm((current) => ({
-      ...current,
-      [field]: value === 'true',
-    }));
+    setForm((current) => ({ ...current, [field]: value }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -97,15 +52,6 @@ export function useProjectConfigForm({
         epicPrefix: form.epicPrefix,
         commentPrefix: form.commentPrefix,
       });
-      setPreferences({
-        cardDensity: form.cardDensity,
-        defaultPage: form.defaultPage,
-        defaultGraphView: form.defaultGraphView,
-        defaultHistoryView: form.defaultHistoryView,
-        listPageSize: form.listPageSize,
-        listDefaultSort: form.listDefaultSort,
-        groupRelatedWork: form.groupRelatedWork,
-      });
       toast.success('Settings saved');
       onOpenChange(false);
     } catch (error) {
@@ -115,9 +61,7 @@ export function useProjectConfigForm({
 
   return {
     form,
-    handleBooleanChange,
     handleFieldChange,
-    handleNumberChange,
     handleSubmit,
     isPending: updateProjectConfig.isPending,
   };
