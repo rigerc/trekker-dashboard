@@ -3,6 +3,7 @@ import { DEFAULT_PRIORITY } from '@server/lib/constants';
 import type { Dependency, Task } from '@server/lib/db';
 import { comments, dependencies, epics, getDb, projects, tasks } from '@server/lib/db';
 import { generateId } from '@server/lib/id-generator';
+import { withRetry } from '@server/lib/retry';
 import { eq, or } from 'drizzle-orm';
 
 interface TaskWithDeps extends Task {
@@ -119,7 +120,7 @@ export async function create(input: CreateTaskInput): Promise<TaskWithDeps> {
     updatedAt: now,
   };
 
-  await db.insert(tasks).values(task);
+  await withRetry(() => db.insert(tasks).values(task));
 
   return { ...task, dependsOn: [], blocks: [] };
 }
@@ -142,7 +143,7 @@ export async function update(id: string, input: UpdateTaskInput): Promise<TaskWi
   if (input.tags !== undefined) updates.tags = input.tags;
   if (input.epicId !== undefined) updates.epicId = input.epicId;
 
-  await db.update(tasks).set(updates).where(eq(tasks.id, id));
+  await withRetry(() => db.update(tasks).set(updates).where(eq(tasks.id, id)));
 
   return getById(id);
 }
@@ -166,15 +167,17 @@ export async function remove(id: string): Promise<void> {
   // Collect all IDs in the subtree (leaves first, root last)
   const allIds = await collectSubtreeIds(id);
 
-  await db.transaction(async (tx) => {
-    for (const taskId of allIds) {
-      await tx.delete(comments).where(eq(comments.taskId, taskId));
-      await tx
-        .delete(dependencies)
-        .where(or(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, taskId)));
-    }
-    for (const taskId of allIds) {
-      await tx.delete(tasks).where(eq(tasks.id, taskId));
-    }
-  });
+  await withRetry(() =>
+    db.transaction(async (tx) => {
+      for (const taskId of allIds) {
+        await tx.delete(comments).where(eq(comments.taskId, taskId));
+        await tx
+          .delete(dependencies)
+          .where(or(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, taskId)));
+      }
+      for (const taskId of allIds) {
+        await tx.delete(tasks).where(eq(tasks.id, taskId));
+      }
+    })
+  );
 }

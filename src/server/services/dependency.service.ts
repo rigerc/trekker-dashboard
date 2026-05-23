@@ -2,6 +2,7 @@ import { ConflictError, NotFoundError, ValidationError } from '@server/errors';
 import type { Dependency } from '@server/lib/db';
 import { dependencies, getDb, tasks } from '@server/lib/db';
 import { generateUuid } from '@server/lib/id-generator';
+import { withRetry } from '@server/lib/retry';
 import { and, eq } from 'drizzle-orm';
 
 interface CreateDependencyInput {
@@ -63,35 +64,37 @@ export async function create(input: CreateDependencyInput): Promise<Dependency> 
     throw new ValidationError('A task cannot depend on itself');
   }
 
-  return await db.transaction(async (tx) => {
-    await assertTaskExists(tx, taskId, 'Task');
-    await assertTaskExists(tx, dependsOnId, 'Dependency task');
+  return await withRetry(() =>
+    db.transaction(async (tx) => {
+      await assertTaskExists(tx, taskId, 'Task');
+      await assertTaskExists(tx, dependsOnId, 'Dependency task');
 
-    const existingDep = await tx
-      .select()
-      .from(dependencies)
-      .where(and(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, dependsOnId)));
+      const existingDep = await tx
+        .select()
+        .from(dependencies)
+        .where(and(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, dependsOnId)));
 
-    if (existingDep[0]) {
-      throw new ConflictError('Dependency already exists');
-    }
+      if (existingDep[0]) {
+        throw new ConflictError('Dependency already exists');
+      }
 
-    const wouldCycle = await wouldCreateCycle(tx, taskId, dependsOnId);
-    if (wouldCycle) {
-      throw new ValidationError('Adding this dependency would create a cycle');
-    }
+      const wouldCycle = await wouldCreateCycle(tx, taskId, dependsOnId);
+      if (wouldCycle) {
+        throw new ValidationError('Adding this dependency would create a cycle');
+      }
 
-    const dependency = {
-      id: generateUuid(),
-      taskId,
-      dependsOnId,
-      createdAt: new Date(),
-    };
+      const dependency = {
+        id: generateUuid(),
+        taskId,
+        dependsOnId,
+        createdAt: new Date(),
+      };
 
-    await tx.insert(dependencies).values(dependency);
+      await tx.insert(dependencies).values(dependency);
 
-    return dependency;
-  });
+      return dependency;
+    })
+  );
 }
 
 export async function remove(taskId: string, dependsOnId: string): Promise<void> {
@@ -107,7 +110,9 @@ export async function remove(taskId: string, dependsOnId: string): Promise<void>
     throw new NotFoundError('Dependency', `${taskId} -> ${dependsOnId}`);
   }
 
-  await db
-    .delete(dependencies)
-    .where(and(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, dependsOnId)));
+  await withRetry(() =>
+    db
+      .delete(dependencies)
+      .where(and(eq(dependencies.taskId, taskId), eq(dependencies.dependsOnId, dependsOnId)))
+  );
 }
